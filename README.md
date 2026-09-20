@@ -327,6 +327,16 @@ moves a number.
 
 ---
 
+## Reading
+
+The long-form writeup of the idea in this repo — the ladder, the capping rule, the 32-claim
+run with its scope stated, and a 30-minute build:
+**[The Assumption Ledger: a Safety Guarantee Is Capped by the One Thing Nobody Checked](https://agentic-portfolio-lovat.vercel.app/articles/assumption-ledger.html)**
+(also in [中文](https://agentic-portfolio-lovat.vercel.app/articles/assumption-ledger.zh-CN.html) ·
+[Español](https://agentic-portfolio-lovat.vercel.app/articles/assumption-ledger.es.html) ·
+[한국어](https://agentic-portfolio-lovat.vercel.app/articles/assumption-ledger.ko.html) ·
+[日本語](https://agentic-portfolio-lovat.vercel.app/articles/assumption-ledger.ja.html)).
+
 ## Related
 
 Same operating system, different domains: `research-anything`, `FDE-os`, and the
