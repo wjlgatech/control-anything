@@ -66,9 +66,9 @@ set**, listed in §2. Growth happens by *deepening* a domain, not by appending o
 
 | # | Decision | Why it is his | Default if he says nothing |
 |---|---|---|---|
-| D1 | **Public or private?** `research-anything` is 🔒 private; `FDE-os` is public with a live webapp. This repo has no confidential input, so it *can* be public — and a community organ is worthless if the repo is private. | Venture positioning, not engineering. | **Public**, built public-safe from commit #1. |
-| D2 | **Is this a content flywheel or a tool?** The knowledge base could feed the agentic-portfolio article rail (signal), or stay an internal instrument (no signal). | Flywheel choice — his half. | Build the instrument first; **hold publishing** until he calls it. |
-| D3 | **Does this become a 6th `<X>-anything` sibling** with the shared playbook, or a one-off? | Portfolio shape. | **Sibling** — it inherits `docs/REPO_PLAYBOOK.md` unchanged. |
+| D1 | ~~**Public or private?**~~ **DECIDED 2026-09-19: public.** Built public-safe from commit #1 — no confidential input, no client or employer named. | Venture positioning, not engineering. | ✅ Public. |
+| D2 | ~~**Content flywheel or internal tool?**~~ **DECIDED 2026-09-19: content flywheel.** The gate's catches feed the agentic-portfolio article rail; long-form publishes canonically there first, then syndicates. | Flywheel choice — his half. | ✅ Content flywheel. |
+| D3 | ~~**A 6th `<X>-anything` sibling, or a one-off?**~~ **DECIDED 2026-09-19: sibling.** Inherits `docs/REPO_PLAYBOOK.md`; §5 carries the seven lessons this build earned back to the family. | Portfolio shape. | ✅ Sibling. |
 
 **Cofounder's call on the one thing that matters:** the highest-ROI move is **the gate, not the
 corpus**. A hundred more citations change nothing; a gate that catches its first real over-claim
