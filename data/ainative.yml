@@ -59,6 +59,18 @@ principles:
     statement: Publishing and merging stay human; nothing here auto-posts or auto-merges.
     evidence: [CONTRIBUTING.md]
 
+  - id: readme-answers-its-readers
+    statement: >-
+      The README answers all eleven reader questions from the playbook's contract, each with
+      the evidence its question demands — and the floor only rises.
+    evidence: [tools/readme_contract.py, data/readme-floor.json, tests/test_readme_contract.py]
+
+  - id: gates-are-mutation-checked
+    statement: >-
+      Every gate this repo adds ships with a test that breaks it and proves the suite notices.
+      A gate that cannot fail is decorative, and decorative gates manufacture confidence.
+    evidence: [tests/test_claim_gate.py, tests/test_readme_contract.py]
+
   - id: community-is-a-protocol
     statement: A contribution must carry its assumption ledger and pass make check.
     evidence: [CONTRIBUTING.md, .github/PULL_REQUEST_TEMPLATE.md]

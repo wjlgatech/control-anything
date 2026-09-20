@@ -143,3 +143,56 @@ Appended per §3's rule — promote what generalizes beyond the repo that earned
    the README with an explanation, rather than being narrowed to the subset that looks
    good. A repo whose whole thesis is "state what your claim actually rests on" cannot
    launder its own metric.
+
+## 6. The README contract (added 2026-09-19 — the axis this playbook was missing)
+
+**The gap, named.** §0 above prescribes which FILES a repo has and which gates guard them.
+Until today it said essentially nothing about what the README must CONTAIN. Those are two
+different axes, and the playbook only had one — so a repo could be perfectly gated and still
+open with a wall of prose that answers none of a stranger's questions.
+
+The consequence was measurable the moment a gate existed to measure it. Scoring two repos
+that were both built to this playbook, against a contract extracted from the better one:
+
+| Repo | Score | Has | Lacks |
+|---|---:|---|---|
+| `anyagent` | **82/100** | mental model *with diagrams* · seams table · proof table · tested-with-command · docs index | **honest edges** · a compressed formula |
+| `control-anything` | **55/100** | honest edges · formula · proof | **seams · docs index · provenance · a diagram in the README · the test command** |
+
+Neither was complete, and each was missing what the other had. That is exactly the drift an
+unwritten contract produces: two careful authors converging on different subsets.
+
+**The contract.** Eleven sections, each answering a question a specific reader arrives with.
+A section counts only when it carries the EVIDENCE its question demands — a mental model
+without a diagram is prose; a "tested" section without a runnable command is a claim.
+
+| Section | The reader's question | The evidence that makes it real |
+|---|---|---|
+| identity | What IS this? | a real sentence under the H1, not just a title |
+| quickstart | How do I run it right now? | a fenced, runnable command block |
+| **mentalmodel** | Can I picture how it works? | **a DIAGRAM** — Mermaid or a committed SVG |
+| formula | What is the idea in one line? | a compressed identity or a pull-quote |
+| **seams** | What can I swap? | a table naming what swaps and what bodies ship |
+| proof | Has this touched reality? | a table of real cases |
+| tested | How do I know it works? | the actual command, and the count it produces |
+| **docsindex** | Where is everything else? | a table linking each doc to what is in it |
+| honest | What does it NOT do? | actual stated limits |
+| provenance | What is it made of / carrying? | dependencies, and what it deliberately does not carry |
+| license | May I use it? | — |
+
+**The ratchet.** `tools/readme_contract.py` scores it, `data/readme-floor.json` records the
+floor, and `make check` runs it. The floor only rises. The gate takes an optional path, so
+you can point it at any repo — which is how the contract was calibrated, and how you check
+a sibling before copying from it.
+
+**Two things this earned on its first run, both worth keeping:**
+
+1. **The gate had a bug that made three checks unpassable.** `\S{40,}` matches forty
+   *consecutive non-space* characters — a URL, never a sentence. Both repos "failed"
+   identity for a reason that was the checker's fault. Caught by running the gate against
+   the repo it was extracted FROM and asking why the source of the pattern scored badly on
+   its own pattern. **Calibrate a new gate against a known-good artifact**; if the exemplar
+   fails, suspect the gate first.
+2. **A section can be present and still not count.** Every heading-only match is a place
+   where a reader's question was acknowledged and not answered. That distinction is the
+   whole value; checking headings alone would let a table of contents satisfy the contract.

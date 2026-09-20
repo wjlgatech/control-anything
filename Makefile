@@ -1,10 +1,10 @@
-.PHONY: check test spine layers graph gate loops readme readme-check ainative stats clean help
+.PHONY: check test spine layers graph gate loops readme readme-check readme-contract readme-bump ainative stats clean help
 PY := python3
 
 # The finish line: `make check` gates the repo. Offline, deterministic, no keys, no network.
 # If it is green on a bare machine, the repo is green. That property is what lets every
 # generated surface be drift-checked instead of eyeballed.
-check: spine layers graph gate readme-check ainative test  ## everything CI runs; exit 0 = green
+check: spine layers graph gate readme-check readme-contract ainative test  ## everything CI runs; exit 0 = green
 
 spine:        ## the data spine loads, every foreign key resolves, no duplicate ids
 	@$(PY) tools/check.py
@@ -26,6 +26,12 @@ readme:       ## regenerate the README's generated blocks from data/
 
 readme-check: ## README generated blocks match data/ (drift gate)
 	@$(PY) scripts/readme.py --check
+
+readme-contract: ## README answers all 11 reader questions (docs/REPO_PLAYBOOK.md §6); floor only rises
+	@$(PY) tools/readme_contract.py
+
+readme-bump:  ## raise the README-contract floor after a real gain
+	@$(PY) tools/readme_contract.py --bump
 
 ainative:     ## self-audit: how the repo operates, scored against data/ainative.yml
 	@$(PY) scripts/ainative.py

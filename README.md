@@ -94,6 +94,32 @@ transferable to another — and it is why `Organ` is a closed set in
 | the room | **plant** `P` | the filesystem, the network, the user |
 | the thermometer | **sensor** `C` | tool return values |
 
+```mermaid
+%%{init: {'theme':'base','themeVariables':{'primaryColor':'#e8e6dc','primaryTextColor':'#141413','primaryBorderColor':'#b0aea5','lineColor':'#b0aea5','secondaryColor':'#faf9f5','tertiaryColor':'#faf9f5','fontFamily':'Poppins, ui-sans-serif, system-ui, -apple-system, Arial, sans-serif'}}}%%
+flowchart LR
+    classDef accent fill:#d97757,color:#faf9f5,stroke:#141413;
+    classDef blue fill:#6a9bcc,color:#faf9f5,stroke:#141413;
+    classDef green fill:#788c5d,color:#faf9f5,stroke:#141413;
+    classDef ink fill:#141413,color:#faf9f5,stroke:#141413;
+    R([🎯 reference<br/>what you want]) --> C{⊖ comparator<br/>the gap}
+    C --> K[🧠 controller<br/>what decides]
+    K --> A[🔧 actuator<br/>what acts]
+    A --> P[🌍 plant<br/>what is acted on]
+    P --> S[📡 sensor<br/>what reports back]
+    S -- "the loop closes here" --> C
+    class R blue;
+    class C accent;
+    class K ink;
+    class A accent;
+    class P green;
+    class S blue;
+```
+
+🧒 *A thermostat: you dial 72°, a thermometer says 68°, the furnace runs, the room warms,
+the thermometer reads again. That last arrow — **reads again** — is the entire subject.
+Cut it and you are hoping. An AI agent is this picture with the world as the room; most of
+them are missing the ⊖ box entirely.*
+
 Plus the three fields people skip, which is where real systems actually fail:
 
 - **latency** — every loop has delay, and delay is what turns a stable controller unstable.
@@ -103,6 +129,29 @@ Plus the three fields people skip, which is where real systems actually fail:
 
 Run `ca loopify agent-loop` and read the `fallback` line. It says: **typically none.**
 A thermostat built that way would burn the house down.
+
+---
+
+## What you can swap (the seams)
+
+Everything at a real volatility boundary is reachable without touching the rest. Honest
+inventory — this repo does **not** yet ship an abstract-base-class-plus-fake for every row,
+which is the bar `anyagent` sets; where a seam is a plain parameter, the table says so.
+
+| Seam | What it swaps | Bodies shipped | Shape |
+|---|---|---|---|
+| `AssumptionStatus.ceiling` | the four numbers the whole gate turns on | the default ladder | one dict, one place — the design judgement, isolated so it can be argued with |
+| `ControlClaimGate(require_evidence=, require_assumptions=)` | how strict the referee is | strict (default) · permissive | constructor flags |
+| `EvidenceType.ceiling` | what each kind of evidence can carry | proof → certified … analogy → anecdote | one dict |
+| `Registry(root=)` | where the spine loads from | `data/*.yml` | constructor arg; the ONLY module that touches disk |
+| `src/control_anything/addons/` | optional capability | *(none yet — the seam exists, declared in `data/addons.yml`)* | package boundary, enforced by `tools/layers.py` |
+| `scripts/ca.py` verbs | the surface | loopify · gate · trace · graph · loops · stats | thin CLI; logic lives in `core/` |
+
+**The boundary is enforced, not just intended.** `tools/layers.py` AST-walks every core file
+and fails the build if `core/` imports anything beyond the standard library, `pyyaml`, and
+itself — **function-local imports included**, because that is how a dependency actually
+creeps in. Widening it means editing `CORE_THIRD_PARTY` on purpose, which makes it a
+reviewed decision rather than an accident.
 
 ---
 
@@ -282,6 +331,61 @@ control-anything/
 | `make readme-check` | these tables still match `data/` |
 | `make ainative` | the repo still has the organs it claims to have |
 | `make test` | pytest |
+
+---
+
+## Tested to the gate
+
+```bash
+make check                 # the whole finish line: offline, no keys, no network, ~2s
+python3 -m pytest -q       # 58 tests
+python3 scripts/ca.py stats
+```
+
+Every gate is a script, not an opinion. The suite includes **four mutation tests** that
+break the capping rule in different ways and assert the suite notices — because a gate
+that passes its own happy path proves nothing, and a gate that cannot fail is decorative.
+Inverting `min` to `max` on the assumption ledger, or dropping the violated-assumption
+refusal, both turn the suite red.
+
+The tests also assert **the numbers this repo publishes in prose**
+(`tests/test_published_numbers.py`): 32 claims, 30 caught, `unverified_rate` 0.53. Changing
+a number now requires changing the article that states it, in the same commit. That coupling
+is what makes silent drift impossible rather than merely unlikely.
+
+---
+
+## Docs
+
+| Doc | What's in it |
+|---|---|
+| [`GOAL.md`](GOAL.md) | The 10x contract. §0 evaluates the request itself before anything is built, names what was weak in it, and records the three decisions only the owner could make |
+| [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) | The shape in two diagrams: the spine → core → gates pipeline, and the capping rule on one real claim. Why the graph is stdlib and what determinism buys |
+| [`docs/REPO_PLAYBOOK.md`](docs/REPO_PLAYBOOK.md) | The reusable `<X>-anything` pattern. §5 holds the seven lessons this repo earned; §6 is the README contract that this file is checked against |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | The contribution gate — every claim carries its assumption ledger. Also the fastest useful contribution: find a ledger that is wrong |
+| [`CHANGELOG.md`](CHANGELOG.md) | What changed and why, including an *Investigated / Rejected* section so dead ends are not re-litigated |
+| [`CLAUDE.md`](CLAUDE.md) | The agent guide: invariants you must not break, and the honesty rules specific to this corpus |
+| [`skills/control-anything/SKILL.md`](skills/control-anything/SKILL.md) | The portable version — run the five-step judgement by hand, with no repo and no tooling |
+| [`llms.txt`](llms.txt) | The machine-readable summary for answer engines and agents |
+
+---
+
+## Provenance
+
+**Runtime is Python 3.11+ and `pyyaml`. Nothing else, ever** — enforced by
+[`tools/layers.py`](tools/layers.py), which fails the build on an undeclared import.
+`pytest` is the only development dependency.
+
+What this repo deliberately does **not** carry: no network calls anywhere under
+`make check`, no API keys (`tests/conftest.py` strips provider keys so nothing can go live
+even by accident), no clock, no randomness, and no vendored copies of the work it cites —
+every external source is a resolvable DOI, arXiv id, or URL.
+
+The corpus was assembled by five bounded research passes with strict VERIFIED / UNVERIFIED
+output contracts. Rows that could not be resolved against a primary source are marked
+`verified: false` rather than asserted, and the resulting `unverified_rate` is published
+rather than narrowed to a flattering subset. Two contested death dates are recorded as
+unverified for exactly this reason — they are real people.
 
 ---
 

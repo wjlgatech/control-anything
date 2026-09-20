@@ -32,6 +32,35 @@ All notable changes to this project are documented here, in
 - **54 tests**, including four **mutation tests** that break the gate in different ways and
   assert the suite notices. A gate that cannot fail proves nothing.
 
+### Added — the README contract (2026-09-19)
+
+- **`tools/readme_contract.py`** — eleven sections, each answering a question a specific
+  reader arrives with, and each requiring the EVIDENCE its question demands. A mental model
+  without a diagram is prose; a "tested" section without a runnable command is a claim.
+  Wired into `make check`; floor in `data/readme-floor.json`; floor only rises.
+- **`docs/REPO_PLAYBOOK.md` §6** — the axis the playbook was missing. §0 prescribed which
+  FILES a repo has and which gates guard them, and said essentially nothing about what the
+  README must CONTAIN.
+- **README 55 → 100.** Added a Mermaid diagram of the six-organ loop (the README had no
+  diagram at all), a seams table, a tested-to-the-gate section with the real command, a docs
+  index, and a provenance section.
+- **`tests/test_readme_contract.py`** — ten tests including four mutation tests that delete a
+  section and assert the score drops, plus one proving a bare table of contents cannot pass.
+
+### Investigated / Measured (2026-09-19)
+
+- **The gate's first run found a bug in the gate.** Three checks used `\S{40,}` — forty
+  *consecutive non-space* characters, which matches a URL and never a sentence. Both repos
+  "failed" `identity` for a reason that was the checker's fault. Found by running the gate
+  against the repo the contract was extracted FROM and asking why the exemplar scored badly
+  on its own pattern. **Calibrate a new gate against a known-good artifact; if the exemplar
+  fails, suspect the gate.**
+- **Measured, both repos, same gate:** `anyagent` 82/100 — has mental-model-with-diagrams,
+  seams, proof, tested, docs index; lacks **honest edges** entirely. `control-anything`
+  55/100 — had honest edges and a formula; lacked seams, docs index, provenance, a diagram,
+  and the test command. Neither was complete, and each was missing what the other had. That
+  is exactly the drift an unwritten contract produces.
+
 ### Decisions worth not re-litigating
 
 - **The gate, not the corpus, is the product.** Build order was gate → spine → corpus. A
