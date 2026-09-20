@@ -1,0 +1,165 @@
+# Labs and institutes.
+#
+# Listed when they OWN something — a line of work you could not get elsewhere. A university
+# with a controls course is not a row here; a group whose name is attached to a concept is.
+
+labs:
+  - id: caltech-cds
+    name: Caltech Control and Dynamical Systems
+    domains: [aerospace, alignment]
+    institution: California Institute of Technology
+    country: USA
+    owns: >-
+      The layered-architecture and hard-tradeoff view of control — robust-yet-fragile,
+      universal laws — now being imported wholesale into agent design.
+    url: https://www.cds.caltech.edu/
+    verified: false
+
+  - id: caltech-amber
+    name: AMBER Lab
+    domains: [robotics, physical-ai]
+    institution: California Institute of Technology
+    country: USA
+    owns: Control barrier functions and their deployment as runtime safety filters on real robots.
+    url: http://ames.caltech.edu/
+    verified: false
+
+  - id: mit-csail
+    name: MIT CSAIL — Robot Locomotion Group
+    domains: [robotics, physical-ai]
+    institution: Massachusetts Institute of Technology
+    country: USA
+    owns: Verification and certification of learned policies; underactuated control meeting diffusion policies.
+    url: https://locomotion.csail.mit.edu/
+    verified: false
+
+  - id: mit-lids
+    name: MIT Laboratory for Information and Decision Systems
+    domains: [robotics, alignment]
+    institution: Massachusetts Institute of Technology
+    country: USA
+    owns: Decision, control, and inference under one roof — the dynamic-programming lineage into modern RL theory.
+    url: https://lids.mit.edu/
+    verified: false
+
+  - id: berkeley-eecs
+    name: UC Berkeley EECS — control and learning
+    domains: [driving, robotics]
+    institution: University of California, Berkeley
+    country: USA
+    owns: Reachability-based safety, and the honest measurement of learned control against classical baselines.
+    url: https://www2.eecs.berkeley.edu/
+    verified: false
+
+  - id: berkeley-bair
+    name: Berkeley Artificial Intelligence Research (BAIR / RAIL)
+    domains: [physical-ai, robotics]
+    institution: University of California, Berkeley
+    country: USA
+    owns: Deep reinforcement learning for robotics at scale, and robot foundation models.
+    url: https://bair.berkeley.edu/
+    verified: false
+
+  - id: stanford
+    name: Stanford — convex optimization and control
+    domains: [robotics, infra]
+    institution: Stanford University
+    country: USA
+    owns: Convex optimization as the computational substrate of control, including embedded solvers.
+    url: https://web.stanford.edu/~boyd/
+    verified: false
+
+  - id: penn-grasp
+    name: Penn GRASP / ESE
+    domains: [robotics, physical-ai]
+    institution: University of Pennsylvania
+    country: USA
+    owns: Learning-enabled control with sample-complexity and robustness guarantees.
+    url: https://www.grasp.upenn.edu/
+    verified: false
+
+  - id: eth-ifa
+    name: ETH Institute for Dynamic Systems and Control
+    domains: [robotics, physical-ai]
+    institution: ETH Zürich
+    country: Switzerland
+    owns: Learning-based model predictive control with safety guarantees; predictive safety filters.
+    url: https://idsc.ethz.ch/
+    verified: false
+
+  - id: oxford-cs
+    name: Oxford Department of Computer Science — verification
+    domains: [alignment, driving]
+    institution: University of Oxford
+    country: UK
+    owns: Formal quantitative verification extended to systems containing neural components.
+    url: https://www.cs.ox.ac.uk/
+    verified: false
+
+  - id: anthropic-alignment
+    name: Anthropic Alignment Science
+    domains: [alignment, agentic]
+    institution: Anthropic
+    country: USA
+    owns: >-
+      Treating the steering of powerful models as an engineering discipline with
+      measurements and gates rather than a research aspiration.
+    url: https://alignment.anthropic.com/
+    verified: false
+
+  # ---- the mean-field / optimal-transport cluster ---------------------------------
+  # The research pass found this to be the tightest knot in the control-meets-generative
+  # network: Ruthotto and Nurbekyan are now in the SAME department at Emory, and with
+  # Osher and Wuchen Li they are four of the five authors on the 2020 PNAS mean-field
+  # paper. The live centre of the rigorous bridge is here, not in the diffusion labs.
+
+  - id: ucla-math
+    name: UCLA Mathematics — Osher group / IPAM
+    domains: [genai, world-models]
+    institution: University of California, Los Angeles
+    country: USA
+    owns: >-
+      Level-set methods, ENO/WENO schemes, total-variation denoising, Bregman iteration —
+      and now score-based solvers for mean-field control.
+    url: https://www.math.ucla.edu/~sjo/
+    verified: true
+
+  - id: emory-math
+    name: Emory Mathematics — deep learning as optimal control
+    domains: [genai, world-models]
+    institution: Emory University
+    country: USA
+    owns: >-
+      Reading a neural network as a differential equation you steer, so training becomes a
+      numerically solvable optimal-control problem.
+    url: https://math.emory.edu/~lruthot/
+    verified: true
+
+  - id: pku-math
+    name: Peking University School of Mathematical Sciences
+    domains: [genai, alignment]
+    institution: Peking University
+    country: China
+    owns: >-
+      Control theory, machine learning, and scientific computing at their intersection —
+      now holding both poles of the high-dimensional-PDE-by-deep-learning literature.
+    url: https://www.math.pku.edu.cn/
+    verified: true
+
+  - id: duke-math
+    name: Duke Mathematics — Lu group
+    domains: [genai]
+    institution: Duke University
+    country: USA
+    owns: Approximation theory for deep networks — how deep and wide a net must be to solve a PDE.
+    url: https://sites.math.duke.edu/~jianfeng/
+    verified: true
+
+  - id: princeton-orfe
+    name: Princeton ORFE — mean-field games
+    domains: [markets, genai]
+    institution: Princeton University
+    country: USA
+    owns: The probabilistic (forward-backward SDE) theory of mean-field games, which made them simulable.
+    url: https://carmona.princeton.edu/
+    verified: true

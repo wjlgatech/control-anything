@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "control-anything"
+version = "0.1.0"
+description = "Control theory as an instrument for judging AI systems: a guarantee ladder, an assumption ledger, and a knowledge graph that gates its own claims."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Paul Wu" }]
+keywords = ["control-theory", "agentic-ai", "robotics", "world-models", "verification"]
+
+# The core is stdlib + pyyaml. Every addition here is a deliberate act,
+# mirrored in CORE_THIRD_PARTY in tools/layers.py, which fails the build on drift.
+dependencies = ["pyyaml>=6.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4"]
+
+[project.scripts]
+ca = "control_anything.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

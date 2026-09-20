@@ -1,0 +1,36 @@
+# control-anything
+
+> Control theory as an instrument for judging AI systems. Every claim carries a guarantee
+> level (G0 anecdote → G4 certified) and an assumption ledger; a gate mechanically caps the
+> guarantee at what those assumptions actually discharge. "We used an MPC, therefore it is
+> safe" is a failing exit code here.
+
+## Core idea
+A control claim is worth exactly the weakest assumption holding it up.
+effective = min(claimed, weakest-assumption-ceiling, best-evidence-ceiling)
+An `assumed` assumption ceilings a claim at G1; `monitored` at G3; `violated` refuses it.
+
+## The six organs
+Every feedback loop has: reference, comparator, controller, actuator, plant, sensor —
+plus latency, authority and fallback, which is where real systems fail. A thermostat, a
+humanoid and an LLM agent differ in what FILLS each slot, never in which slots exist.
+
+## Key files
+- GOAL.md — the 10x contract; §0 evaluates the request before anything else
+- data/claims.yml — the claim corpus the gate judges
+- data/loops.yml — twelve LoopCards, one per domain
+- data/applications.yml — 34 deployed control loops and the guarantee each actually claims
+- data/works.yml — 86 works; `bridge: rigorous|analogy` separates theorems from metaphors
+- src/control_anything/core/claim_gate.py — the gate
+- src/control_anything/core/models.py — the guarantee ladder and the six organs
+
+## Commands
+make check                     # the whole gate: offline, deterministic, ~2s
+python3 scripts/ca.py stats    # the metrics
+python3 scripts/ca.py gate     # judge every claim
+python3 scripts/ca.py loopify <system>
+python3 scripts/ca.py trace <claim-id>
+
+## Honest edges
+The G0-G4 ladder is a design judgement, not a theorem. unverified_rate is 0.53 and is
+published rather than hidden. Nothing here runs a live plant.

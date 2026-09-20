@@ -1,0 +1,1019 @@
+# Seminal works — the papers that introduced the concepts, and the modern papers that
+# carry control ideas into AI.
+#
+# Every row needs a year and a resolvable source (doi, arxiv, or url). tools/check.py
+# enforces it: an uncheckable citation is worse than no citation, because it looks like
+# evidence. `bridge: rigorous|analogy` is set on the AI-side rows and is the single most
+# important column in this file — conflating a theorem with a metaphor is the failure mode
+# this repo most fears.
+
+works:
+  # ---- the canon ------------------------------------------------------------------
+  - id: maxwell-governors-1868
+    title: On Governors
+    year: 1868
+    authors: [maxwell]
+    venue: Proceedings of the Royal Society of London
+    idea: Write the machine's equations down and check whether the wobbles die out.
+    doi: 10.1098/rspl.1867.0055
+    concepts: [feedback, asymptotic-stability]
+    verified: true
+
+  - id: lyapunov-1892
+    title: The General Problem of the Stability of Motion
+    year: 1892
+    authors: [lyapunov]
+    venue: Doctoral thesis; English translation International Journal of Control 55 (1992)
+    idea: Find a downhill energy score and you have proved stability, without solving anything.
+    doi: 10.1080/00207179208934253
+    concepts: [lyapunov-function, asymptotic-stability]
+    verified: true
+
+  - id: nyquist-1932
+    title: Regeneration Theory
+    year: 1932
+    authors: [nyquist]
+    venue: Bell System Technical Journal 11:126–147
+    idea: Encircle a point on a plot and your amplifier will sing.
+    doi: 10.1002/j.1538-7305.1932.tb02344.x
+    concepts: [margins, feedback]
+    verified: true
+
+  - id: black-1934
+    title: Stabilized Feedback Amplifiers
+    year: 1934
+    authors: [black]
+    venue: Bell System Technical Journal 13:1–18
+    idea: Throw away gain to buy accuracy and immunity to drift.
+    doi: 10.1002/j.1538-7305.1934.tb00652.x
+    concepts: [feedback, open-vs-closed]
+    verified: true
+
+  - id: wiener-cybernetics-1948
+    title: "Cybernetics: Or Control and Communication in the Animal and the Machine"
+    year: 1948
+    authors: [wiener]
+    venue: MIT Press
+    idea: Steering, nerves, and machines obey the same feedback laws.
+    url: https://mitpress.mit.edu/9780262730099/cybernetics/
+    concepts: [feedback]
+    verified: true
+
+  - id: bellman-dp-1957
+    title: Dynamic Programming
+    year: 1957
+    authors: [bellman]
+    venue: Princeton University Press
+    idea: Solve the last small step first, then work backwards.
+    doi: 10.1515/9781400835386
+    concepts: [dynamic-programming]
+    verified: true
+
+  - id: kalman-1960
+    title: A New Approach to Linear Filtering and Prediction Problems
+    year: 1960
+    authors: [kalman]
+    venue: Journal of Basic Engineering 82:35–45
+    idea: Blend a prediction with a noisy reading, weighted by how much you trust each.
+    doi: 10.1115/1.3662552
+    concepts: [kalman-filter, observer]
+    verified: true
+
+  - id: pontryagin-1962
+    title: The Mathematical Theory of Optimal Processes
+    year: 1962
+    authors: [pontryagin]
+    venue: Interscience (English translation of the 1961 Russian edition)
+    idea: With limited actuators, the best control often slams straight to a limit.
+    url: https://archive.org/details/mathematicaltheo0000pont
+    concepts: [maximum-principle]
+    verified: false
+
+  - id: kalman-1963
+    title: Mathematical Description of Linear Dynamical Systems
+    year: 1963
+    authors: [kalman]
+    venue: Journal of SIAM Control 1:152–192
+    idea: Two separate questions — can you steer it, and can you see inside it?
+    doi: 10.1137/0301010
+    concepts: [controllability, observability]
+    verified: true
+
+  - id: luenberger-1964
+    title: Observing the State of a Linear System
+    year: 1964
+    authors: [luenberger]
+    venue: IEEE Transactions on Military Electronics 8:74–80
+    idea: Run a model alongside the real thing and correct it by the error.
+    doi: 10.1109/TME.1964.4323124
+    concepts: [observer]
+    verified: true
+
+  - id: zames-1966
+    title: On the input-output stability of time-varying nonlinear feedback systems, Part I
+    year: 1966
+    authors: [zames]
+    venue: IEEE Transactions on Automatic Control 11:228–238
+    idea: If the round trip shrinks signals, the loop stays tame.
+    doi: 10.1109/TAC.1966.1098316
+    concepts: [small-gain]
+    verified: true
+
+  - id: willems-1972
+    title: "Dissipative dynamical systems, Part I: General theory"
+    year: 1972
+    authors: [willems]
+    venue: Archive for Rational Mechanics and Analysis 45:321–351
+    idea: Stored energy can never exceed the energy supplied.
+    doi: 10.1007/BF00276493
+    concepts: [passivity]
+    verified: true
+
+  - id: francis-wonham-1976
+    title: The internal model principle of control theory
+    year: 1976
+    authors: [wonham]
+    venue: Automatica 12:457–465
+    idea: To cancel a repeating signal, you must carry a copy of it inside.
+    doi: 10.1016/0005-1098(76)90006-6
+    concepts: [internal-model-principle]
+    verified: true
+
+  - id: utkin-1977
+    title: Variable structure systems with sliding modes
+    year: 1977
+    authors: [utkin]
+    venue: IEEE Transactions on Automatic Control 22:212–222
+    idea: Switch fast to pin the state onto a chosen surface.
+    doi: 10.1109/TAC.1977.1101446
+    concepts: [sliding-mode]
+    verified: true
+
+  - id: doyle-lqg-1978
+    title: Guaranteed margins for LQG regulators
+    year: 1978
+    authors: [doyle]
+    venue: IEEE Transactions on Automatic Control 23:756–757
+    idea: >-
+      Two pages and one counterexample: the optimal controller can have zero safety margin.
+      The most important short paper in the field.
+    doi: 10.1109/TAC.1978.1101812
+    concepts: [lqg, margins, separation-principle]
+    verified: true
+
+  - id: zames-1981
+    title: "Feedback and optimal sensitivity: model reference transformations, multiplicative seminorms, and approximate inverses"
+    year: 1981
+    authors: [zames]
+    venue: IEEE Transactions on Automatic Control 26:301–320
+    idea: Design against the worst disturbance, measured by a peak norm.
+    doi: 10.1109/TAC.1981.1102603
+    concepts: [h-infinity]
+    verified: true
+
+  - id: doyle-mu-1982
+    title: Analysis of feedback systems with structured uncertainties
+    year: 1982
+    authors: [doyle]
+    venue: IEE Proceedings D 129:242–250
+    idea: Score a design against a whole structured family of possible model errors.
+    doi: 10.1049/ip-d.1982.0053
+    concepts: [mu-synthesis]
+    verified: true
+
+  - id: sutton-td-1988
+    title: Learning to predict by the methods of temporal differences
+    year: 1988
+    authors: [sutton]
+    venue: Machine Learning 3:9–44
+    idea: Learn long-run value from the gap between two successive guesses.
+    doi: 10.1007/BF00115009
+    concepts: [dynamic-programming]
+    verified: true
+
+  - id: sontag-iss-1989
+    title: Smooth stabilization implies coprime factorization
+    year: 1989
+    authors: [sontag]
+    venue: IEEE Transactions on Automatic Control 34:435–443
+    idea: Bounded disturbance in must mean bounded deviation out.
+    doi: 10.1109/9.28018
+    concepts: [iss]
+    verified: true
+
+  - id: dgkf-1989
+    title: State-space solutions to standard H2 and H-infinity control problems
+    year: 1989
+    authors: [doyle]
+    venue: IEEE Transactions on Automatic Control 34:831–847
+    idea: Worst-case design reduces to two solvable matrix equations.
+    doi: 10.1109/9.29425
+    concepts: [h-infinity]
+    verified: true
+
+  - id: kkm-backstepping-1991
+    title: Systematic design of adaptive controllers for feedback linearizable systems
+    year: 1991
+    authors: [krstic]
+    venue: IEEE Transactions on Automatic Control 36:1241–1253
+    idea: Stabilize one layer, then use it as the handle for the next.
+    doi: 10.1109/9.100933
+    concepts: [backstepping, robust-vs-adaptive]
+    verified: true
+
+  - id: mayne-mpc-2000
+    title: "Constrained model predictive control: stability and optimality"
+    year: 2000
+    authors: [mayne, rawlings]
+    venue: Automatica 36:789–814
+    idea: The exact ingredients that make repeated re-planning provably stable.
+    doi: 10.1016/S0005-1098(99)00214-9
+    concepts: [mpc]
+    verified: true
+
+  - id: boyd-convex-2004
+    title: Convex Optimization
+    year: 2004
+    authors: [boyd]
+    venue: Cambridge University Press
+    idea: If you can pose it as a bowl-shaped problem, it always solves.
+    doi: 10.1017/CBO9780511804441
+    concepts: [mpc, lqr]
+    verified: true
+
+  - id: mayne-tube-2005
+    title: Robust model predictive control of constrained linear systems with bounded disturbances
+    year: 2005
+    authors: [mayne]
+    venue: Automatica 41:219–224
+    idea: Plan a corridor around the plan, so noise cannot break it.
+    doi: 10.1016/j.automatica.2004.08.019
+    concepts: [tube-mpc]
+    verified: true
+
+  - id: todorov-ilqg-2005
+    title: A generalized iterative LQG method for locally-optimal feedback control of constrained nonlinear stochastic systems
+    year: 2005
+    authors: [todorov]
+    venue: Proceedings of the American Control Conference 2005:300–306
+    idea: Repeatedly linearize and solve the easy problem to get a good policy.
+    doi: 10.1109/ACC.2005.1469949
+    concepts: [lqr, mpc]
+    verified: true
+
+  - id: mitchell-hji-2005
+    title: A time-dependent Hamilton-Jacobi formulation of reachable sets for continuous dynamic games
+    year: 2005
+    authors: [tomlin]
+    venue: IEEE Transactions on Automatic Control 50:947–957
+    idea: Compute exactly which states can still be kept out of trouble.
+    doi: 10.1109/TAC.2005.851439
+    concepts: [reachability]
+    verified: true
+
+  - id: tedrake-lqrtrees-2010
+    title: "LQR-Trees: feedback motion planning via sums-of-squares verification"
+    year: 2010
+    authors: [tedrake]
+    venue: International Journal of Robotics Research 29:1038–1052
+    idea: Tile the state space with provably safe local controllers.
+    doi: 10.1177/0278364910369189
+    concepts: [lqr, lyapunov-function]
+    verified: true
+
+  - id: levine-gps-2013
+    title: Guided Policy Search
+    year: 2013
+    authors: [levine]
+    venue: ICML, PMLR 28(3):1–9
+    idea: Let a trajectory optimizer teach the neural policy what to copy.
+    url: https://proceedings.mlr.press/v28/levine13.html
+    concepts: [lqr, sysid]
+    verified: true
+
+  - id: ames-cbf-qp-2017
+    title: Control Barrier Function Based Quadratic Programs for Safety Critical Systems
+    year: 2017
+    authors: [ames]
+    venue: IEEE Transactions on Automatic Control 62:3861–3876
+    idea: Wrap any controller in a solver that blocks the unsafe commands.
+    doi: 10.1109/TAC.2016.2638961
+    concepts: [cbf, safety-filter]
+    verified: true
+
+  - id: ames-cbf-2019
+    title: "Control Barrier Functions: Theory and Applications"
+    year: 2019
+    authors: [ames]
+    venue: European Control Conference 2019:3420–3431
+    idea: The consolidated recipe for provable runtime safety filters.
+    arxiv: "1903.11199"
+    doi: 10.23919/ECC.2019.8796030
+    concepts: [cbf, safety-filter]
+    verified: true
+
+  - id: recht-tour-2019
+    title: "A Tour of Reinforcement Learning: The View from Continuous Control"
+    year: 2019
+    authors: [recht]
+    venue: Annual Review of Control, Robotics, and Autonomous Systems 2:253–279
+    idea: >-
+      Judged against classical control baselines, learned control is data-hungry and
+      fragile. The paper that made the AI side take the control side seriously.
+    arxiv: "1806.09460"
+    doi: 10.1146/annurev-control-053018-023825
+    concepts: [lqr, sysid, robust-vs-adaptive]
+    verified: true
+
+  # ---- the AI bridge: rigorous -----------------------------------------------------
+  - id: schulman-trpo-2015
+    title: Trust Region Policy Optimization
+    year: 2015
+    authors: [schulman]
+    venue: ICML
+    idea: Only let the policy change a little each update, so learning never blows up.
+    arxiv: "1502.05477"
+    concepts: [trust-region]
+    bridge: rigorous
+    verified: true
+
+  - id: schulman-ppo-2017
+    title: Proximal Policy Optimization Algorithms
+    year: 2017
+    authors: [schulman]
+    venue: arXiv preprint
+    idea: A cheap clip that keeps each update inside the safe zone.
+    arxiv: "1707.06347"
+    concepts: [trust-region, saturation-antiwindup]
+    bridge: rigorous
+    verified: true
+
+  - id: christiano-rlhf-2017
+    title: Deep reinforcement learning from human preferences
+    year: 2017
+    authors: [christiano]
+    venue: NeurIPS
+    idea: >-
+      Humans compare two clips; a reward model is fitted to those comparisons; the agent
+      optimizes the fitted model. Learning the objective from the operator is system
+      identification of the setpoint.
+    arxiv: "1706.03741"
+    concepts: [preference-setpoint, reward-model, sysid]
+    bridge: rigorous
+    verified: true
+
+  - id: ouyang-instructgpt-2022
+    title: Training language models to follow instructions with human feedback
+    year: 2022
+    authors: [christiano]
+    venue: NeurIPS
+    idea: >-
+      The full three-block loop: a reference model as the nominal plant, a reward model as
+      the observer, and a KL coefficient as the regulator gain.
+    arxiv: "2203.02155"
+    concepts: [kl-regulator, reward-model, preference-setpoint]
+    bridge: rigorous
+    verified: true
+
+  - id: gao-overoptimization-2022
+    title: Scaling Laws for Reward Model Overoptimization
+    year: 2022
+    authors: [schulman]
+    venue: arXiv preprint
+    idea: >-
+      Push too hard on the proxy reward and true quality peaks then falls — and the curve
+      has a measurable shape in the square root of the KL divergence.
+    arxiv: "2210.10760"
+    concepts: [goodhart, kl-regulator, reward-model]
+    bridge: rigorous
+    verified: true
+
+  - id: song-sde-2020
+    title: Score-Based Generative Modeling through Stochastic Differential Equations
+    year: 2020
+    authors: []
+    venue: ICLR 2021
+    idea: >-
+      Adding noise is one equation run forward; generating is the same equation run
+      backward, steered by the learned score.
+    arxiv: "2011.13456"
+    concepts: [reverse-sde, stochastic-optimal-control]
+    bridge: rigorous
+    verified: true
+
+  - id: ho-cfg-2022
+    title: Classifier-Free Diffusion Guidance
+    year: 2022
+    authors: []
+    venue: NeurIPS Workshop
+    idea: >-
+      Extrapolate between the conditional and unconditional prediction. The scale is
+      literally a loop gain, and turning it up too far overshoots.
+    arxiv: "2207.12598"
+    concepts: [guidance-gain, reverse-sde]
+    bridge: rigorous
+    verified: true
+
+  - id: berner-oc-diffusion-2022
+    title: An optimal control perspective on diffusion-based generative modeling
+    year: 2022
+    authors: []
+    venue: arXiv preprint
+    idea: Sampling is solving a Hamilton-Jacobi-Bellman problem, and the loss functions follow from it.
+    arxiv: "2211.01364"
+    concepts: [stochastic-optimal-control, reverse-sde]
+    bridge: rigorous
+    verified: true
+
+  - id: debortoli-bridge-2021
+    title: Diffusion Schrödinger Bridge with Applications to Score-Based Generative Modeling
+    year: 2021
+    authors: []
+    venue: NeurIPS
+    idea: Find the cheapest stochastic path between two distributions in finite time.
+    arxiv: "2106.01357"
+    concepts: [optimal-transport, stochastic-optimal-control]
+    bridge: rigorous
+    verified: true
+
+  - id: leviathan-speculative-2022
+    title: Fast Inference from Transformers via Speculative Decoding
+    year: 2022
+    authors: []
+    venue: ICML 2023
+    idea: >-
+      A small model guesses ahead, the big model checks, and the output is provably
+      identical. A predictor-corrector with an exactness certificate.
+    arxiv: "2211.17192"
+    concepts: [speculative-decoding]
+    bridge: rigorous
+    verified: true
+
+  - id: bhargava-magic-word-2023
+    title: "What's the Magic Word? A Control Theory of LLM Prompting"
+    year: 2023
+    authors: []
+    venue: arXiv preprint
+    idea: Asks which outputs are reachable by prepending some prompt, and measures it.
+    arxiv: "2310.04444"
+    concepts: [controllability, reachability, context-as-actuator]
+    bridge: rigorous
+    verified: true
+
+  - id: phan-neural-simplex-2019
+    title: Neural Simplex Architecture
+    year: 2019
+    authors: []
+    venue: NASA Formal Methods 2020
+    idea: >-
+      Run the smart unverified controller, but hand off to a proven-safe baseline the
+      moment a monitor says danger.
+    arxiv: "1908.00528"
+    concepts: [simplex-architecture, safety-filter]
+    bridge: rigorous
+    verified: true
+
+  - id: mehmood-blackbox-simplex-2021
+    title: The Black-Box Simplex Architecture for Runtime Assurance of Autonomous CPS
+    year: 2021
+    authors: []
+    venue: NASA Formal Methods 2022
+    idea: >-
+      Runtime checks replace static verification of the baseline controller — which is
+      exactly the situation an LLM agent is in.
+    arxiv: "2102.12981"
+    concepts: [simplex-architecture, safety-filter]
+    bridge: rigorous
+    verified: true
+
+  - id: hobbs-rta-2021
+    title: "Run Time Assurance for Safety-Critical Systems: An Introduction to Safety Filtering Approaches"
+    year: 2021
+    authors: []
+    venue: arXiv preprint
+    idea: A tutorial on filters that sit between an untrusted controller and the actuator.
+    arxiv: "2110.03506"
+    concepts: [safety-filter, cbf]
+    bridge: rigorous
+    verified: true
+
+  - id: hadfield-menell-offswitch-2016
+    title: The Off-Switch Game
+    year: 2016
+    authors: []
+    venue: IJCAI 2017
+    idea: >-
+      An agent uncertain about the human's objective has an incentive to let itself be
+      switched off. Corrigibility as a theorem rather than a wish.
+    arxiv: "1611.08219"
+    concepts: [preference-setpoint, safety-filter]
+    bridge: rigorous
+    verified: true
+
+  - id: skalse-reward-hacking-2022
+    title: Defining and Characterizing Reward Hacking
+    year: 2022
+    authors: []
+    venue: NeurIPS
+    idea: >-
+      Formalizes which reward pairs are hackable, and proves the unhackable ones are
+      nearly trivial. Sensor-objective mismatch is structural, not a bug to engineer away.
+    arxiv: "2209.13085"
+    concepts: [goodhart, reward-model]
+    bridge: rigorous
+    verified: true
+
+  - id: rafailov-dpo-2023
+    title: "Direct Preference Optimization: Your Language Model is Secretly a Reward Model"
+    year: 2023
+    authors: []
+    venue: NeurIPS
+    idea: >-
+      Skip the feedback loop entirely — the KL-constrained optimum has a closed form you
+      can fit directly. Deliberately open-loop by design.
+    arxiv: "2305.18290"
+    concepts: [kl-regulator, open-vs-closed, preference-setpoint]
+    bridge: rigorous
+    verified: true
+
+  - id: sinha-long-horizon-2025
+    title: "The Illusion of Diminishing Returns: Measuring Long Horizon Execution in LLMs"
+    year: 2025
+    authors: []
+    venue: arXiv preprint
+    idea: >-
+      Long-horizon failure decomposes into per-step accuracy plus self-conditioning on
+      one's own earlier errors. The loop has positive feedback on its own mistakes.
+    arxiv: "2509.09677"
+    concepts: [error-accumulation]
+    bridge: rigorous
+    verified: true
+
+  # ---- the AI bridge: analogy ------------------------------------------------------
+  - id: bai-constitutional-2022
+    title: "Constitutional AI: Harmlessness from AI Feedback"
+    year: 2022
+    authors: []
+    venue: arXiv preprint
+    idea: Write the rules down, then have the model critique and revise itself against them.
+    arxiv: "2212.08073"
+    concepts: [preference-setpoint, internal-model-principle]
+    bridge: analogy
+    verified: true
+
+  - id: yao-react-2022
+    title: "ReAct: Synergizing Reasoning and Acting in Language Models"
+    year: 2022
+    authors: []
+    venue: ICLR 2023
+    idea: >-
+      Alternate thought and action so observations from the world re-enter the prompt.
+      The canonical closed loop — with no stability analysis anywhere in sight.
+    arxiv: "2210.03629"
+    concepts: [feedback, open-vs-closed]
+    bridge: analogy
+    verified: true
+
+  - id: shinn-reflexion-2023
+    title: "Reflexion: Language Agents with Verbal Reinforcement Learning"
+    year: 2023
+    authors: []
+    venue: NeurIPS
+    idea: Write down what went wrong and keep the note — integral action, in text.
+    arxiv: "2303.11366"
+    concepts: [feedback, error-accumulation]
+    bridge: analogy
+    verified: true
+
+  - id: madaan-self-refine-2023
+    title: "Self-Refine: Iterative Refinement with Self-Feedback"
+    year: 2023
+    authors: []
+    venue: NeurIPS
+    idea: >-
+      The model critiques and rewrites its own output in a loop. A closed loop with no
+      independent sensor — the classic instrument-drift failure mode.
+    arxiv: "2303.17651"
+    concepts: [feedback, observability]
+    bridge: analogy
+    verified: true
+
+  - id: zou-repe-2023
+    title: "Representation Engineering: A Top-Down Approach to AI Transparency"
+    year: 2023
+    authors: []
+    venue: arXiv preprint
+    idea: Read and write high-level concepts as directions in activation space.
+    arxiv: "2310.01405"
+    concepts: [observability, controllability]
+    bridge: analogy
+    verified: true
+
+  - id: zou-circuit-breakers-2024
+    title: Improving Alignment and Robustness with Circuit Breakers
+    year: 2024
+    authors: []
+    venue: NeurIPS
+    idea: Reroute internal representations when harmful processing starts, rather than refusing at the output.
+    arxiv: "2406.04313"
+    concepts: [safety-filter, saturation-antiwindup]
+    bridge: analogy
+    verified: true
+
+  - id: sharma-constitutional-classifiers-2025
+    title: "Constitutional Classifiers: Defending against Universal Jailbreaks across Thousands of Hours of Red Teaming"
+    year: 2025
+    authors: []
+    venue: arXiv preprint
+    idea: >-
+      Separate input and output classifiers trained from a constitution — an independent
+      measurement channel outside the plant.
+    arxiv: "2501.18837"
+    concepts: [safety-filter, observability]
+    bridge: analogy
+    verified: true
+
+  - id: lightman-verify-2023
+    title: Let's Verify Step by Step
+    year: 2023
+    authors: []
+    venue: ICLR 2024
+    idea: Grade each reasoning step rather than only the final answer — dense feedback beats terminal-only.
+    arxiv: "2305.20050"
+    concepts: [process-reward]
+    bridge: analogy
+    verified: true
+
+  - id: snell-test-time-2024
+    title: Scaling LLM Test-Time Compute Optimally can be More Effective than Scaling Model Parameters
+    year: 2024
+    authors: []
+    venue: arXiv preprint
+    idea: Spend more thinking per question, allocated by how hard the question looks.
+    arxiv: "2408.03314"
+    concepts: [process-reward, dynamic-programming]
+    bridge: analogy
+    verified: true
+
+  - id: kwon-paged-attention-2023
+    title: Efficient Memory Management for Large Language Model Serving with PagedAttention
+    year: 2023
+    authors: []
+    venue: SOSP
+    idea: Page the key-value cache the way an operating system pages memory.
+    arxiv: "2309.06180"
+    concepts: [continuous-batching, saturation-antiwindup]
+    bridge: analogy
+    verified: true
+
+  - id: anthropic-effective-agents-2024
+    title: Building effective agents
+    year: 2024
+    authors: []
+    venue: Anthropic engineering blog
+    idea: >-
+      Prefer simple workflows; close the loop only when you need to. The evaluator-optimizer
+      pattern is a feedback controller with the control vocabulary removed.
+    url: https://www.anthropic.com/engineering/building-effective-agents
+    concepts: [open-vs-closed, feedback]
+    bridge: analogy
+    verified: true
+
+  - id: anthropic-context-engineering-2025
+    title: Effective context engineering for AI agents
+    year: 2025
+    authors: []
+    venue: Anthropic engineering blog
+    idea: >-
+      Context is a finite budget that degrades as it grows — a saturating actuator, and
+      compaction is state estimation with forgetting.
+    url: https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents
+    concepts: [context-as-actuator, saturation-antiwindup]
+    bridge: analogy
+    verified: true
+
+  # ---- the rigorous math bridge ----------------------------------------------------
+  # Every row here is `bridge: rigorous`. This is the one place in the repo where
+  # "control theory applied to generative AI" is a theorem rather than a metaphor.
+
+  - id: zhou-lu-sicon-2025
+    title: A Policy Gradient Framework for Stochastic Optimal Control Problems with Global Convergence Guarantee
+    year: 2025
+    authors: [mo-zhou, jianfeng-lu]
+    venue: SIAM Journal on Control and Optimization 63(4):2605–2631
+    idea: >-
+      The method that trains RLHF — policy gradient — provably finds the true global optimum
+      on continuous-time stochastic optimal control, not just a local one.
+    doi: 10.1137/23M1570739
+    arxiv: "2302.05816"
+    concepts: [pg-global-convergence, stochastic-optimal-control]
+    bridge: rigorous
+    verified: true
+    note: >-
+      Author order is Mo Zhou then Jianfeng Lu. A widely circulated secondary article
+      reversed it; verified against the SIAM page and the arXiv record.
+
+  - id: zhou-lu-jmlr-2023
+    title: Single Time-scale Actor-critic Method to Solve the Linear Quadratic Regulator with Convergence Guarantees
+    year: 2023
+    authors: [mo-zhou, jianfeng-lu]
+    venue: Journal of Machine Learning Research 24(222):1–34
+    idea: >-
+      Actor-critic — the architecture behind modern RL — solves the classic control problem
+      with a proven convergence rate and sample complexity.
+    arxiv: "2202.00048"
+    concepts: [pg-global-convergence, lqr]
+    bridge: rigorous
+    verified: true
+
+  - id: zhou-osher-li-rms-2025
+    title: A deep learning algorithm for computing mean field control problems via forward-backward score dynamics
+    year: 2025
+    authors: [mo-zhou, osher, wuchen-li]
+    venue: Research in the Mathematical Sciences 12(3), article 42
+    idea: >-
+      Use the same score function that powers diffusion models to solve crowd-control
+      problems, by running the dynamics forward and backward.
+    doi: 10.1007/s40687-025-00531-9
+    arxiv: "2401.09547"
+    concepts: [mean-field-games, reverse-sde, stochastic-optimal-control]
+    bridge: rigorous
+    verified: true
+    note: arXiv preprint is 2024; the journal version is 2025. Secondary coverage conflates the two.
+
+  - id: zhou-osher-li-jcp-2025
+    title: Score-based Neural Ordinary Differential Equations for Computing Mean Field Control Problems
+    year: 2025
+    authors: [mo-zhou, osher, wuchen-li]
+    venue: Journal of Computational Physics 542, article 114369
+    idea: >-
+      Recast a high-dimensional crowd-control problem as an unconstrained optimization
+      solved by a continuously-flowing network.
+    doi: 10.1016/j.jcp.2025.114369
+    arxiv: "2409.16471"
+    concepts: [mean-field-games, neural-ode, stochastic-optimal-control]
+    bridge: rigorous
+    verified: true
+
+  - id: zhou-osher-li-jcp-2026
+    title: Simulating Fokker-Planck equations via mean field control of score-based normalizing flows
+    year: 2026
+    authors: [mo-zhou, osher, wuchen-li]
+    venue: Journal of Computational Physics 566, article 115274
+    idea: >-
+      Simulate how a probability cloud spreads over time by treating it as a crowd-control
+      problem steered by a learned score.
+    doi: 10.1016/j.jcp.2026.115274
+    arxiv: "2506.05723"
+    concepts: [mean-field-games, flow-matching, wasserstein-gradient-flow]
+    bridge: rigorous
+    verified: true
+
+  - id: park-liu-zhou-osher-iclr-2026
+    title: Neural Hamilton-Jacobi Characteristic Flows for Optimal Transport
+    year: 2026
+    authors: [mo-zhou, osher]
+    venue: ICLR 2026
+    idea: >-
+      Solve the cheapest-way-to-move-mass problem by following the characteristic curves of
+      a Hamilton-Jacobi equation with a network.
+    arxiv: "2510.01153"
+    url: https://openreview.net/forum?id=YbQxus1KEa
+    concepts: [optimal-transport, dynamic-programming]
+    bridge: rigorous
+    verified: true
+    note: Full author order is Yesom Park, Shu Liu, Mo Zhou, Stanley Osher.
+
+  - id: osher-sethian-1988
+    title: "Fronts propagating with curvature-dependent speed: algorithms based on Hamilton-Jacobi formulations"
+    year: 1988
+    authors: [osher]
+    venue: Journal of Computational Physics 79:12–49
+    idea: >-
+      Track a moving shape by tracking a water level on an invisible landscape, instead of
+      tracking the shape itself.
+    doi: 10.1016/0021-9991(88)90002-2
+    concepts: [dynamic-programming]
+    verified: true
+    note: Level-set methods. Part of the work cited for Osher's 2014 Carl Friedrich Gauss Prize.
+
+  - id: lasry-lions-2007
+    title: Mean field games
+    year: 2007
+    authors: [lions]
+    venue: Japanese Journal of Mathematics 2:229–260
+    idea: >-
+      When a huge crowd each plays their own best strategy, stop tracking individuals and
+      track only the crowd's density.
+    doi: 10.1007/s11537-007-0657-8
+    concepts: [mean-field-games]
+    verified: true
+
+  - id: huang-malhame-caines-2006
+    title: "Large population stochastic dynamic games: closed-loop McKean-Vlasov systems and the Nash certainty equivalence principle"
+    year: 2006
+    authors: [caines]
+    venue: Communications in Information and Systems 6(3):221–252
+    idea: >-
+      The engineering twin of mean-field games: each agent acts alone using only a guess of
+      the crowd average, and is still nearly optimal.
+    doi: 10.4310/CIS.2006.v6.n3.a5
+    concepts: [mean-field-games]
+    verified: true
+
+  - id: benamou-brenier-2000
+    title: A computational fluid mechanics solution to the Monge-Kantorovich mass transfer problem
+    year: 2000
+    authors: [benamou, brenier]
+    venue: Numerische Mathematik 84:375–393
+    idea: >-
+      Moving a pile of sand optimally is the same as choosing the laziest fluid flow that
+      carries it there in one unit of time.
+    doi: 10.1007/s002110050002
+    concepts: [optimal-transport]
+    verified: true
+
+  - id: jko-1998
+    title: The variational formulation of the Fokker-Planck equation
+    year: 1998
+    authors: []
+    venue: SIAM Journal on Mathematical Analysis 29:1–17
+    idea: >-
+      Diffusion is not random drifting — it is a distribution rolling downhill on an energy
+      landscape, where distance means the cost of moving mass.
+    doi: 10.1137/S0036141096303359
+    concepts: [wasserstein-gradient-flow, optimal-transport]
+    verified: true
+
+  - id: ruthotto-pnas-2020
+    title: A machine learning framework for solving high-dimensional mean field game and mean field control problems
+    year: 2020
+    authors: [ruthotto, osher, wuchen-li, nurbekyan]
+    venue: PNAS 117:9183–9193
+    idea: Let a neural network carry the crowd's value function, so hundred-dimensional crowd problems run on a laptop.
+    doi: 10.1073/pnas.1922204117
+    arxiv: "1912.01825"
+    concepts: [mean-field-games, dynamic-programming]
+    bridge: rigorous
+    verified: true
+
+  - id: han-jentzen-e-2018
+    title: Solving high-dimensional partial differential equations using deep learning
+    year: 2018
+    authors: [jiequn-han, weinan-e]
+    venue: PNAS 115:8505–8510
+    idea: >-
+      Turn a monstrous high-dimensional equation into a game where the gradient of the
+      solution is the policy, then learn that policy.
+    doi: 10.1073/pnas.1718942115
+    arxiv: "1707.02568"
+    concepts: [deep-bsde, stochastic-optimal-control]
+    bridge: rigorous
+    verified: true
+
+  - id: weinan-e-2017
+    title: A proposal on machine learning via dynamical systems
+    year: 2017
+    authors: [weinan-e]
+    venue: Communications in Mathematics and Statistics 5:1–11
+    idea: A deep network is really a moving system observed layer by layer, so train it the way engineers steer a system.
+    doi: 10.1007/s40304-017-0103-z
+    concepts: [neural-ode, maximum-principle]
+    bridge: rigorous
+    verified: true
+
+  - id: haber-ruthotto-2017
+    title: Stable architectures for deep neural networks
+    year: 2017
+    authors: [ruthotto]
+    venue: Inverse Problems 34(1):014004
+    idea: >-
+      If the layer-to-layer dynamics are unstable, deep training explodes — so design
+      architectures that are provably well-behaved, like a stable differential equation.
+    doi: 10.1088/1361-6420/aa9a90
+    arxiv: "1705.03341"
+    concepts: [neural-ode, asymptotic-stability, lyapunov-function]
+    bridge: rigorous
+    verified: true
+
+  - id: chen-neural-ode-2018
+    title: Neural Ordinary Differential Equations
+    year: 2018
+    authors: [rtq-chen]
+    venue: NeurIPS 2018
+    idea: >-
+      Let the hidden state flow continuously in time and hand the depth to a solver. The
+      gradient method is Pontryagin's costate equation under another name.
+    arxiv: "1806.07366"
+    concepts: [neural-ode, maximum-principle]
+    bridge: rigorous
+    verified: true
+
+  - id: lipman-flow-matching-2022
+    title: Flow Matching for Generative Modeling
+    year: 2022
+    authors: [lipman, rtq-chen]
+    venue: ICLR 2023
+    idea: >-
+      Do not simulate during training — write down the arrow each point should follow at
+      each time, and regress on it.
+    arxiv: "2210.02747"
+    concepts: [flow-matching, optimal-transport]
+    bridge: rigorous
+    verified: true
+
+  - id: albergo-interpolants-2022
+    title: Building Normalizing Flows with Stochastic Interpolants
+    year: 2022
+    authors: []
+    venue: ICLR 2023
+    idea: Pick any smooth recipe that morphs noise into data, then learn the speed field of that morph.
+    arxiv: "2209.15571"
+    concepts: [flow-matching]
+    bridge: rigorous
+    verified: true
+
+  - id: song-ermon-2019
+    title: Generative Modeling by Estimating Gradients of the Data Distribution
+    year: 2019
+    authors: [yang-song, ermon]
+    venue: NeurIPS 2019
+    idea: >-
+      Teach a network which way "uphill toward real data" points from any noisy image, then
+      keep stepping uphill until static becomes a picture.
+    arxiv: "1907.05600"
+    concepts: [reverse-sde]
+    bridge: rigorous
+    verified: true
+
+  - id: fazel-lqr-pg-2018
+    title: Global Convergence of Policy Gradient Methods for the Linear Quadratic Regulator
+    year: 2018
+    authors: [fazel, kakade]
+    venue: ICML 2018, PMLR 80:1467–1476
+    idea: >-
+      Even though the objective is not bowl-shaped, policy gradient on the classic control
+      problem still finds the true optimum, and fast.
+    arxiv: "1801.05039"
+    concepts: [pg-global-convergence, lqr]
+    bridge: rigorous
+    verified: true
+
+  - id: dean-lqr-sample-2020
+    title: On the Sample Complexity of the Linear Quadratic Regulator
+    year: 2020
+    authors: [dean, matni, recht]
+    venue: Foundations of Computational Mathematics 20:633–679
+    idea: How many experiments do you need before you can safely control a machine you do not yet understand?
+    doi: 10.1007/s10208-019-09426-y
+    arxiv: "1710.01688"
+    concepts: [sysid, lqr, robust-vs-adaptive]
+    bridge: rigorous
+    verified: true
+
+  - id: kappen-path-integral-2005
+    title: Path integrals and symmetry breaking for optimal control theory
+    year: 2005
+    authors: [kappen]
+    venue: Journal of Statistical Mechanics 2005(11):P11011
+    idea: >-
+      For a special family of control problems the hard nonlinear equation becomes linear,
+      so you can solve it by averaging forward random rollouts.
+    doi: 10.1088/1742-5468/2005/11/P11011
+    concepts: [path-integral-control]
+    verified: true
+
+  - id: todorov-lmdp-2009
+    title: Efficient computation of optimal actions
+    year: 2009
+    authors: [todorov]
+    venue: PNAS 106:11478–11483
+    idea: >-
+      Reframe "choose an action" as "choose the next state distribution, and pay for how far
+      you bend nature" — and the answer becomes a linear equation.
+    doi: 10.1073/pnas.0710743106
+    concepts: [path-integral-control, dynamic-programming]
+    verified: true
+
+  - id: cuturi-sinkhorn-2013
+    title: "Sinkhorn Distances: Lightspeed Computation of Optimal Transport Distances"
+    year: 2013
+    authors: [cuturi]
+    venue: NeurIPS 2013
+    idea: >-
+      Blur the transport plan a little and an impossible problem collapses into a few rounds
+      of row and column rescaling.
+    arxiv: "1306.0895"
+    concepts: [optimal-transport]
+    verified: true
+
+  - id: peyre-cuturi-2019
+    title: Computational Optimal Transport
+    year: 2019
+    authors: [peyre, cuturi]
+    venue: Foundations and Trends in Machine Learning 11(5-6):355–607
+    idea: The standard reference for actually computing the cheapest way to move one pile of stuff onto another.
+    doi: 10.1561/2200000073
+    arxiv: "1803.00567"
+    concepts: [optimal-transport]
+    verified: true

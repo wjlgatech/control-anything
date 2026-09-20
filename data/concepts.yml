@@ -1,0 +1,522 @@
+# The concept ontology.
+#
+# Every concept maps to at least one of the six loop organs (tools/check.py enforces it).
+# That mapping is what makes cross-domain transfer possible: "anti-windup" and "context
+# compaction" are both ACTUATOR concepts, which is why they rhyme.
+#
+# `strength` is the strongest guarantee this concept can support when its assumptions
+# hold — the ceiling, not a promise. `plain` must be readable by a bright 15-year-old:
+# no acronym before the idea it stands for.
+
+concepts:
+  # ---- the fundamentals ------------------------------------------------------------
+  - id: feedback
+    name: Feedback
+    plain: Measure the result, compare it to the goal, act on the difference.
+    formal: "u = K(r − y); sensitivity S = 1/(1+L), complementary sensitivity T = L/(1+L)"
+    guarantees: Error from disturbance and model mismatch shrinks by the sensitivity |S|.
+    strength: certified
+    organs: [comparator, sensor]
+
+  - id: open-vs-closed
+    name: Open loop vs closed loop
+    plain: Acting on a plan blind, versus watching the result and correcting.
+    formal: "y = Pu (open) versus y = PC/(1+PC)·r (closed)"
+    guarantees: Only the closed loop rejects disturbances nobody told it about.
+    strength: certified
+    organs: [comparator, sensor]
+
+  - id: bibo-stability
+    name: Bounded-input bounded-output stability
+    plain: Any finite input produces a finite output. Nothing runs away.
+    formal: "∫₀^∞ |h(t)| dt < ∞ for impulse response h"
+    guarantees: No blow-up for any bounded signal.
+    strength: certified
+    organs: [plant]
+    refines: [feedback]
+
+  - id: asymptotic-stability
+    name: Asymptotic and exponential stability
+    plain: Nudged away, it comes back — and exponential adds a guaranteed rate.
+    formal: "x(t) → 0; exponential: ‖x(t)‖ ≤ M‖x(0)‖e^(−λt)"
+    guarantees: Recovery from an initial upset, with a decay rate you can quote.
+    strength: certified
+    organs: [plant]
+    refines: [bibo-stability]
+
+  - id: lyapunov-function
+    name: Lyapunov function
+    plain: An energy-like score that always runs downhill proves the system settles.
+    formal: "V(x) > 0, V(0) = 0, V̇(x) < 0 on a region"
+    guarantees: Stability without ever solving the equations of motion.
+    strength: certified
+    organs: [plant, controller]
+    refines: [asymptotic-stability]
+
+  - id: iss
+    name: Input-to-state stability
+    plain: A small disturbance in means a proportionally small wobble out.
+    formal: "‖x(t)‖ ≤ β(‖x₀‖, t) + γ(‖u‖_∞), β ∈ KL, γ ∈ K"
+    guarantees: Graceful degradation under a persistent disturbance.
+    strength: certified
+    organs: [plant]
+    refines: [lyapunov-function]
+
+  - id: controllability
+    name: Controllability
+    plain: You can steer it to any state you want, in finite time.
+    formal: "rank[B AB … A^(n−1)B] = n"
+    guarantees: Every state is reachable by some input.
+    strength: certified
+    organs: [actuator, plant]
+
+  - id: observability
+    name: Observability
+    plain: You can work out what is going on inside from the outputs alone.
+    formal: "rank[C; CA; …; CA^(n−1)] = n"
+    guarantees: The internal state is recoverable from measurements.
+    strength: certified
+    organs: [sensor, plant]
+
+  - id: observer
+    name: Observer / state estimation
+    plain: Run a copy of the system alongside it, corrected by how wrong the copy was.
+    formal: "x̂̇ = Ax̂ + Bu + L(y − Cx̂), with A − LC Hurwitz"
+    guarantees: Estimation error decays to zero.
+    strength: certified
+    organs: [sensor]
+    refines: [observability]
+
+  - id: separation-principle
+    name: Separation principle
+    plain: Design the estimator and the controller apart, then bolt them together.
+    formal: "Optimal output feedback = Kalman gain + LQR gain; closed-loop poles are the union"
+    guarantees: The combined design keeps both sets of guarantees — for linear-Gaussian systems only.
+    strength: certified
+    organs: [controller, sensor]
+
+  - id: internal-model-principle
+    name: Internal model principle
+    plain: To cancel a repeating disturbance, you must carry a copy of it inside.
+    formal: "Robust regulation requires the exosystem modes in the loop (Francis–Wonham)"
+    guarantees: Zero steady-state error to that class of signals.
+    strength: certified
+    organs: [controller]
+
+  - id: margins
+    name: Gain and phase margin
+    plain: How much extra gain or lag you can absorb before it starts oscillating.
+    formal: "GM = 1/|L(jω₁₈₀)|; PM = 180° + ∠L(jω_gc)"
+    guarantees: Tolerance to a scalar gain or delay error.
+    strength: robust
+    organs: [controller, plant]
+
+  - id: waterbed
+    name: Bode's sensitivity integral (the waterbed effect)
+    plain: Push the error down at one frequency and it pops up at another. The benefit is conserved.
+    formal: "∫₀^∞ ln|S(jω)| dω = π Σ Re(p_k); = 0 for a stable plant"
+    guarantees: An impossibility result — total feedback benefit cannot be created, only moved.
+    strength: certified
+    organs: [comparator, controller]
+
+  - id: small-gain
+    name: Small-gain theorem
+    plain: If a signal shrinks on every round trip, the loop cannot run away.
+    formal: "‖H₁‖·‖H₂‖ < 1 ⇒ closed-loop input-output stability"
+    guarantees: Stability of an interconnection, from component gains alone.
+    strength: certified
+    organs: [plant, controller]
+
+  - id: passivity
+    name: Passivity
+    plain: Things that only store or burn energy can be safely plugged together.
+    formal: "∃ storage V with V̇ ≤ uᵀy; passive ⊕ passive is passive"
+    guarantees: Stable interconnection regardless of the model's details.
+    strength: certified
+    organs: [plant]
+
+  # ---- estimation and optimal control ----------------------------------------------
+  - id: kalman-filter
+    name: Kalman filter
+    plain: The best guess of a hidden state, blending a prediction with a noisy reading.
+    formal: "K = PCᵀ(CPCᵀ + R)⁻¹, with a Riccati update of P"
+    guarantees: Minimum mean-square error — under linear dynamics and Gaussian noise.
+    strength: statistical
+    organs: [sensor]
+    refines: [observer]
+
+  - id: lqr
+    name: Linear quadratic regulator
+    plain: The cheapest way to hold steady, trading error against effort.
+    formal: "min ∫ xᵀQx + uᵀRu; u = −R⁻¹BᵀPx, P solves the Riccati equation"
+    guarantees: Optimal cost, plus large classical stability margins.
+    strength: certified
+    organs: [controller]
+
+  - id: lqg
+    name: Linear quadratic Gaussian control
+    plain: The same optimal controller when you can only see noisy sensors.
+    formal: "Kalman filter cascaded with the LQR gain, via the separation principle"
+    guarantees: Optimal expected cost — and provably NO guaranteed margin (Doyle 1978).
+    strength: statistical
+    organs: [controller, sensor]
+    refines: [lqr]
+
+  - id: dynamic-programming
+    name: Dynamic programming and the principle of optimality
+    plain: An optimal long plan is built out of optimal short ones, solved backwards.
+    formal: "V(x) = min_u [c(x,u) + V(f(x,u))]; Hamilton–Jacobi–Bellman in continuous time"
+    guarantees: Global optimality, at a cost exponential in state dimension.
+    strength: certified
+    organs: [controller]
+
+  - id: maximum-principle
+    name: Pontryagin's maximum principle
+    plain: When the actuator has hard limits, the best control often slams to a limit.
+    formal: "Necessary conditions via the costate: ṗ = −∂H/∂x, u* = argmin_u H"
+    guarantees: Necessary conditions for an optimal trajectory under input constraints.
+    strength: certified
+    organs: [controller, actuator]
+
+  # ---- robustness ------------------------------------------------------------------
+  - id: h-infinity
+    name: H-infinity control
+    plain: Design against the single worst disturbance, not the average one.
+    formal: "min_K ‖T_zw‖_∞ < γ, via two Riccati equations or linear matrix inequalities"
+    guarantees: A bounded worst-case gain from disturbance to error.
+    strength: robust
+    organs: [controller]
+
+  - id: mu-synthesis
+    name: Structured singular value (mu) synthesis
+    plain: Guarantee performance across a whole family of possible modelling errors.
+    formal: "μ_Δ(M) = 1/min{σ̄(Δ) : det(I − MΔ) = 0}; D–K iteration"
+    guarantees: Stability and performance over a structured uncertainty set.
+    strength: robust
+    organs: [controller]
+    refines: [h-infinity]
+
+  - id: robust-vs-adaptive
+    name: Robust versus adaptive control
+    plain: Robust survives what you already feared; adaptive learns what you missed.
+    formal: "Fixed K valid over Δ, versus θ̂ updated online with a Lyapunov proof"
+    guarantees: "Robust: guarantees now. Adaptive: convergence later, if the signal is rich enough."
+    strength: robust
+    organs: [controller]
+
+  - id: reachability
+    name: Reachability analysis
+    plain: Work out every state that could still end in trouble, and stay out of it.
+    formal: "Value function solves the Hamilton–Jacobi–Isaacs equation; the safe set is a level set"
+    guarantees: The exact safe set against a worst-case disturbance.
+    strength: certified
+    organs: [plant, controller]
+
+  # ---- nonlinear and constrained ---------------------------------------------------
+  - id: mpc
+    name: Model predictive control
+    plain: Re-plan the next few seconds at every step, but only ever apply the first move.
+    formal: "min over horizon N subject to constraints, with a terminal cost and terminal set"
+    guarantees: Constraint satisfaction plus stability — given the terminal ingredients.
+    strength: certified
+    organs: [controller]
+
+  - id: tube-mpc
+    name: Tube model predictive control
+    plain: Plan a corridor instead of a line, so noise cannot push you out of it.
+    formal: "Nominal plan + ancillary gain K; error confined to a robust invariant set Z"
+    guarantees: Constraints hold for every disturbance in the assumed set.
+    strength: robust
+    organs: [controller]
+    refines: [mpc]
+
+  - id: backstepping
+    name: Backstepping
+    plain: Stabilize the innermost part, then use it as the lever for the next one out.
+    formal: "Recursive control-Lyapunov functions V_i = V_(i−1) + ½z_i², with virtual controls α_i"
+    guarantees: Global stability for strict-feedback nonlinear systems.
+    strength: certified
+    organs: [controller]
+    refines: [lyapunov-function]
+
+  - id: sliding-mode
+    name: Sliding mode control
+    plain: Switch very fast to pin the state onto a chosen surface, then slide it home.
+    formal: "s(x) = 0; switching u with ṡ·s ≤ −η|s|"
+    guarantees: Insensitivity to matched uncertainty — at the cost of chattering.
+    strength: robust
+    organs: [controller]
+
+  - id: cbf
+    name: Control barrier function
+    plain: A safety filter that edits your command only when it would cross the line.
+    formal: "ḣ ≥ −α(h), imposed pointwise inside a quadratic program"
+    guarantees: Forward invariance of the safe set {h ≥ 0}.
+    strength: certified
+    organs: [actuator, controller]
+
+  - id: safety-filter
+    name: Safety filter / runtime assurance
+    plain: Sit between the clever untrusted controller and the actuator, and veto bad commands.
+    formal: "u_safe = argmin ‖u − u_nominal‖ subject to a safety constraint"
+    guarantees: Whatever the constraint encodes, independent of how the nominal controller behaves.
+    strength: robust
+    organs: [actuator]
+    refines: [cbf]
+
+  - id: simplex-architecture
+    name: Simplex architecture
+    plain: >-
+      Run the smart unproven controller, but hand off to a proven-safe baseline the moment
+      a monitor says danger. The single most transferable safety pattern there is.
+    formal: "Decision module switches between an unverified complex controller and a verified baseline"
+    guarantees: The baseline's guarantee, provided the monitor and the switch are themselves sound.
+    strength: robust
+    organs: [controller, actuator]
+    refines: [safety-filter]
+
+  # ---- limits and identification ---------------------------------------------------
+  - id: dead-time
+    name: Dead time / latency
+    plain: A delay means you are steering on old news, and it eats your safety margin.
+    formal: "e^(−sT) contributes −ωT of phase; a Smith predictor compensates when T is known"
+    guarantees: A hard ceiling on achievable bandwidth. This is a limit, not a feature.
+    strength: certified
+    organs: [sensor, actuator]
+
+  - id: saturation-antiwindup
+    name: Actuator saturation and anti-windup
+    plain: Motors have limits; meanwhile the integrator keeps piling on and you overshoot badly.
+    formal: "u = sat(v); feed (u − v) back into the integrator"
+    guarantees: Recovery from saturation within a region of attraction.
+    strength: certified
+    organs: [actuator]
+
+  - id: sysid
+    name: System identification
+    plain: Fit a model of the thing you are controlling from measured inputs and outputs.
+    formal: "Prediction-error method: θ̂ = argmin Σ ε(t,θ)²"
+    guarantees: Consistent parameter estimates, given excitation and a correct model structure.
+    strength: statistical
+    organs: [plant]
+
+  - id: persistence-excitation
+    name: Persistence of excitation
+    plain: You only learn a parameter if the signal keeps poking it.
+    formal: "∫_t^(t+T) φφᵀ dτ ≥ αI for all t, some α > 0, T > 0"
+    guarantees: Parameter convergence — not merely error convergence.
+    strength: statistical
+    organs: [reference, plant]
+
+  # ---- the rigorous AI bridge ------------------------------------------------------
+  - id: stochastic-optimal-control
+    name: Stochastic optimal control
+    plain: Steer a random process toward a goal at the least expected cost.
+    formal: "Value function solves the Hamilton–Jacobi–Bellman PDE; verification theorem gives optimality"
+    guarantees: Optimality of the resulting control law, under the stated dynamics.
+    strength: certified
+    organs: [controller, plant]
+    refines: [dynamic-programming]
+
+  - id: reverse-sde
+    name: Reverse-time SDE and the probability-flow ODE
+    plain: >-
+      Adding noise to data is one equation run forward; generating data is the same equation
+      run backward, steered by the learned score.
+    formal: "dx = [f − g²∇ₓ log p_t(x)]dt + g dw̄; the score ∇ₓ log p_t is the control"
+    guarantees: Samples from the target distribution, given an exact score and exact integration.
+    strength: certified
+    organs: [controller, plant]
+    refines: [stochastic-optimal-control]
+
+  - id: guidance-gain
+    name: Guidance scale as a loop gain
+    plain: >-
+      The knob that makes a generated image "more like the prompt" is a gain — and like
+      every gain, turning it up past a point produces overshoot and artefacts.
+    formal: "ε̃ = ε_uncond + w(ε_cond − ε_uncond); w is the gain"
+    guarantees: Nothing by itself. It is a tuning knob with a documented failure mode at high w.
+    strength: empirical
+    organs: [controller]
+    refines: [reverse-sde]
+
+  - id: optimal-transport
+    name: Optimal transport and the Schrödinger bridge
+    plain: The cheapest way to move one pile of probability onto another.
+    formal: "Benamou–Brenier: min ∫∫ ½‖v‖²ρ dx dt subject to ∂_tρ + ∇·(ρv) = 0"
+    guarantees: A minimum-energy path between distributions; entropic version = Schrödinger bridge.
+    strength: certified
+    organs: [controller, plant]
+
+  - id: mean-field-games
+    name: Mean-field control and mean-field games
+    plain: >-
+      What one agent should do when it is surrounded by a crowd of agents just like it,
+      and only the crowd's average matters.
+    formal: "Coupled Hamilton–Jacobi–Bellman and Fokker–Planck equations; Nash equilibrium in the limit N → ∞"
+    guarantees: Existence and uniqueness of equilibrium under monotonicity conditions.
+    strength: certified
+    organs: [controller, plant]
+    refines: [stochastic-optimal-control]
+
+  - id: trust-region
+    name: Trust region
+    plain: Only let the policy change a little each update, so learning never blows up.
+    formal: "max E[A] subject to E[KL(π_old ‖ π_new)] ≤ δ"
+    guarantees: Monotonic improvement — the reinforcement-learning analogue of a stability margin.
+    strength: certified
+    organs: [controller]
+
+  - id: kl-regulator
+    name: KL penalty as a regulator
+    plain: >-
+      A leash back to the original model. The further the tuned model drifts, the harder
+      it is pulled back — which is exactly what a proportional regulator does.
+    formal: "r_total = r_θ(x,y) − β·KL(π_RL ‖ π_ref); β is the gain"
+    guarantees: Bounded drift from the reference policy, for a given β.
+    strength: statistical
+    organs: [controller, reference]
+
+  - id: preference-setpoint
+    name: Human preference as a setpoint
+    plain: >-
+      The thing we are steering toward is what people say they want — which moves, differs
+      between people, and changes because of the steering.
+    formal: "Bradley–Terry model over pairwise comparisons fits a latent reward r*"
+    guarantees: Nothing yet. Aggregating heterogeneous preferences into one scalar is provably lossy.
+    strength: empirical
+    organs: [reference]
+
+  - id: reward-model
+    name: Reward model as a sensor
+    plain: A learned stand-in for the human rater — a cheap fast instrument that drifts.
+    formal: "r_θ fit to preference data; used as the measured output in the RL loop"
+    guarantees: In-distribution agreement with raters. Out of distribution, nothing.
+    strength: empirical
+    organs: [sensor]
+    refines: [preference-setpoint]
+
+  - id: goodhart
+    name: Goodhart's law / reward overoptimization
+    plain: >-
+      Push too hard on the measurement and the thing you actually wanted gets worse.
+      The measure stops being a measure once it becomes the target.
+    formal: "True reward peaks then declines in √KL from the reference policy (Gao et al.)"
+    guarantees: A fitted empirical law with a measurable knee — the field's one quantitative control law here.
+    strength: empirical
+    organs: [sensor, comparator]
+    refines: [reward-model]
+
+  - id: error-accumulation
+    name: Error accumulation and self-conditioning
+    plain: >-
+      A long task fails not because each step is bad but because the model reads its own
+      earlier mistakes and doubles down. That is positive feedback.
+    formal: "Horizon failure decomposes into per-step accuracy × self-conditioning on prior errors"
+    guarantees: Nothing. It is a named failure mode with empirical decomposition, not a bound.
+    strength: empirical
+    organs: [plant]
+
+  - id: context-as-actuator
+    name: Context assembly as the controlled variable
+    plain: >-
+      When the weights are frozen, the only thing you actually get to move is what goes
+      into the context window. That is your actuator, and it saturates.
+    formal: "Manipulated variable = the assembled context; the budget is a hard saturation limit"
+    guarantees: Nothing proven. The framing is useful and the evidence is empirical.
+    strength: empirical
+    organs: [actuator]
+    refines: [saturation-antiwindup]
+
+  - id: speculative-decoding
+    name: Speculative decoding
+    plain: >-
+      A small fast model guesses ahead; the big model checks the guesses. The output is
+      provably identical to what the big model would have produced alone.
+    formal: "Draft with q, accept with probability min(1, p/q), resample the rejection"
+    guarantees: Exact preservation of the target distribution — a genuine certificate.
+    strength: certified
+    organs: [controller, actuator]
+
+  - id: continuous-batching
+    name: Continuous batching
+    plain: Schedule work per step rather than per request, so finished work leaves immediately.
+    formal: "Iteration-level scheduling over the running batch"
+    guarantees: Throughput improvement at equal latency. Measured, not bounded.
+    strength: empirical
+    organs: [controller]
+
+  - id: process-reward
+    name: Process reward / dense step-level feedback
+    plain: Grade every step of the reasoning, not just the final answer.
+    formal: "Per-step value estimate used to steer search, rather than a terminal-only signal"
+    guarantees: Nothing formal. Empirically beats terminal-only feedback on reasoning benchmarks.
+    strength: empirical
+    organs: [sensor, comparator]
+
+  # ---- the rigorous math bridge, continued -----------------------------------------
+  - id: neural-ode
+    name: Neural ordinary differential equation
+    plain: >-
+      Instead of stacking a fixed number of layers, let the hidden state flow continuously
+      and hand the depth to a differential-equation solver.
+    formal: "dh/dt = f(h,t,θ); gradients via the adjoint ODE, which is Pontryagin's costate equation"
+    guarantees: Exact gradients at constant memory, given an accurate solver.
+    strength: certified
+    organs: [plant, controller]
+    refines: [maximum-principle]
+
+  - id: flow-matching
+    name: Flow matching and stochastic interpolants
+    plain: >-
+      Do not simulate anything during training. Just write down the arrow each point should
+      follow at each moment, and teach the network to predict the arrow.
+    formal: "Conditional probability path + continuity equation ∂_tρ + ∇·(ρv) = 0; regress the velocity field v"
+    guarantees: The learned flow transports the source to the target, given an exact velocity field.
+    strength: certified
+    organs: [controller, plant]
+    refines: [optimal-transport]
+
+  - id: deep-bsde
+    name: Deep backward stochastic differential equation method
+    plain: >-
+      Turn a monstrous high-dimensional equation into a game where the thing the network
+      learns IS the control, and the equation then solves itself.
+    formal: "Backward SDE reformulation of a parabolic PDE; the network parameterises ∇u, the control"
+    guarantees: Convergence to the PDE solution under standard regularity conditions.
+    strength: certified
+    organs: [controller]
+    refines: [stochastic-optimal-control]
+
+  - id: pg-global-convergence
+    name: Global convergence of policy gradient
+    plain: >-
+      Even though the thing being optimized is not bowl-shaped, policy gradient still finds
+      the true best controller — and there is a proof, with a rate.
+    formal: "Gradient dominance (Polyak-Łojasiewicz) on the LQR cost; extended to continuous-time stochastic control"
+    guarantees: Convergence to the global optimum, with a sample-complexity bound.
+    strength: certified
+    organs: [controller]
+    refines: [lqr, trust-region]
+
+  - id: wasserstein-gradient-flow
+    name: Wasserstein gradient flow
+    plain: >-
+      Diffusion is not random drifting — it is a probability distribution rolling downhill
+      on an energy landscape, where distance means the cost of moving mass.
+    formal: "JKO scheme; Fokker-Planck as the W2 gradient flow of free energy"
+    guarantees: Existence and uniqueness of the flow under convexity conditions on the energy.
+    strength: certified
+    organs: [plant]
+    refines: [optimal-transport]
+
+  - id: path-integral-control
+    name: Path integral control and linearly-solvable MDPs
+    plain: >-
+      For a special family of problems, "what should I do?" becomes "what is the average of
+      all the good futures?" — and the hard nonlinear equation turns linear.
+    formal: "Hopf-Cole transform z = exp(−v/λ) linearises the HJB; control by Feynman-Kac averaging"
+    guarantees: Exact optimal control for the linearly-solvable class.
+    strength: certified
+    organs: [controller]
+    refines: [stochastic-optimal-control, dynamic-programming]

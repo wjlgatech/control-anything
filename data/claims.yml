@@ -1,0 +1,825 @@
+# The claim corpus — what the gate actually judges.
+#
+# READ THIS FIRST. A claim's `claimed` field is what its authors (or the field's ambient
+# folklore) assert. It is NOT trusted. ControlClaimGate recomputes what the claim has
+# EARNED from its assumption ledger and its evidence, and the difference between those two
+# numbers is the most useful output of this repo.
+#
+# The gate's arithmetic, in one line:
+#     effective = min(claimed, weakest-assumption-ceiling, best-evidence-ceiling)
+# where an `assumed` assumption ceilings you at G1, a `monitored` one at G3, and a
+# `discharged` one not at all.
+#
+# Guarantee levels: G0 anecdote · G1 empirical · G2 statistical · G3 robust · G4 certified
+# Assumption status: discharged (proven/interlocked) · monitored (checked at runtime, with
+#                    a fallback) · assumed (believed, unwatched) · violated (known false)
+#
+# A `monitored` or `discharged` assumption MUST name its `check`. An unnamed check is a
+# wish, and wishes are what this file exists to catch.
+
+claims:
+  # =====================================================================================
+  # Claims that HOLD — the gate is a referee, not a wrecking ball
+  # =====================================================================================
+
+  - id: speculative-decoding-exact
+    statement: >-
+      Speculative decoding produces output identical in distribution to what the target
+      model would have produced alone.
+    claimed: certified
+    evidence: [proof, benchmark]
+    domain: infra
+    loop: llm-serving
+    concepts: [speculative-decoding]
+    bridge: rigorous
+    source: "arXiv:2211.17192"
+    verified: true
+    assumptions:
+      - id: sd-accept-rule
+        statement: The acceptance test is implemented exactly as derived, including the resampling of a rejection.
+        status: discharged
+        check: Distributional equivalence test against unaccelerated decoding on a fixed seed, in CI.
+      - id: sd-same-vocab
+        statement: Draft and target models share a tokenizer and vocabulary.
+        status: discharged
+        check: Asserted at model-load time; mismatched vocabularies refuse to start.
+    notes: >-
+      A genuine G4 in an AI serving stack, and rare enough to be worth pointing at. The
+      guarantee is exact because the correction step was derived, not measured.
+
+  - id: cbf-forward-invariance
+    statement: >-
+      A control barrier function quadratic program renders the safe set forward invariant —
+      once inside, the system cannot leave.
+    claimed: certified
+    evidence: [proof]
+    domain: robotics
+    loop: whole-body-mpc
+    concepts: [cbf, safety-filter]
+    bridge: rigorous
+    source: "10.1109/TAC.2016.2638961"
+    verified: true
+    assumptions:
+      - id: cbf-exact-dynamics
+        statement: The dynamics model used in the barrier constraint matches the real system.
+        status: monitored
+        check: Residual between predicted and measured acceleration, with a safe-stop on threshold breach.
+      - id: cbf-qp-feasible
+        statement: The quadratic program is feasible at every control step.
+        status: monitored
+        check: Feasibility flag per solve; infeasibility triggers the last-known-safe command.
+      - id: cbf-relative-degree
+        statement: The barrier function has uniform relative degree one with respect to the input.
+        status: discharged
+        check: Verified symbolically at design time for the chosen barrier and plant.
+    notes: >-
+      The theorem is certified; the DEPLOYMENT is robust at best, because the model-match
+      assumption is monitored rather than discharged. This row shows the gate doing its job
+      on a result that is genuinely proved — the proof is about the math, not about the robot.
+
+  - id: tube-mpc-constraints
+    statement: >-
+      Tube model predictive control satisfies state and input constraints for every
+      disturbance within the assumed bounded set.
+    claimed: robust
+    evidence: [proof, simulation]
+    domain: robotics
+    loop: whole-body-mpc
+    concepts: [tube-mpc, mpc]
+    bridge: rigorous
+    source: "10.1016/j.automatica.2004.08.019"
+    verified: true
+    assumptions:
+      - id: tube-disturbance-set
+        statement: The real disturbance stays inside the assumed bounded set.
+        status: monitored
+        check: Online residual monitor comparing realised disturbance against the design set.
+      - id: tube-linear-plant
+        statement: The plant is linear, or the linearisation error is inside the disturbance set.
+        status: monitored
+        check: Linearisation residual tracked against the same set; excursions logged and alarmed.
+    notes: "The honest ceiling: robust, exactly as claimed, because every assumption is watched."
+
+  - id: envelope-protection
+    statement: >-
+      Flight envelope protection prevents the aircraft from exceeding structural and
+      aerodynamic limits regardless of the commanded input.
+    claimed: certified
+    evidence: [proof, hardware]
+    domain: aerospace
+    loop: fly-by-wire
+    concepts: [saturation-antiwindup, margins, controllability]
+    source: DO-178C / ARP4754A certification basis
+    verified: false
+    assumptions:
+      - id: env-sensor-redundancy
+        statement: Enough independent sensor channels survive to vote out a failed one.
+        status: discharged
+        check: Triple-redundant dissimilar channels with voting, verified under the certification basis.
+      - id: env-wcet
+        statement: The control law completes within its worst-case execution time budget every frame.
+        status: discharged
+        check: Static worst-case execution time analysis, required evidence for certification.
+      - id: env-model-envelope
+        statement: The aerodynamic model is valid across the certified flight envelope.
+        status: monitored
+        check: Air-data plausibility checks; degradation to alternate law outside validated regions.
+    notes: >-
+      Included because it is the ONE domain where a regulator reads your assumption ledger
+      before you ship. DO-178C is, structurally, a mandated version of this repo's gate.
+
+  - id: droop-frequency
+    statement: >-
+      Droop control on synchronous generators shares load and stabilises grid frequency
+      without communication between units.
+    claimed: certified
+    evidence: [proof, hardware]
+    domain: energy
+    loop: thermostat
+    concepts: [feedback, passivity, internal-model-principle]
+    source: Classical power-system control; standard textbook result
+    verified: false
+    assumptions:
+      - id: droop-inertia
+        statement: Sufficient rotational inertia is present to slow frequency excursions.
+        status: monitored
+        check: Real-time inertia estimation; system operators hold inertia floors as an operating constraint.
+    notes: >-
+      Worth carrying precisely because the assumption is now eroding: inverter-dominated
+      grids have less rotational inertia, so a result that held for a century is becoming
+      conditional. A monitored assumption is an early-warning system.
+
+  - id: dpo-closed-form
+    statement: >-
+      Direct preference optimization recovers the optimum of the KL-constrained reward
+      objective in closed form, without running a reinforcement-learning loop.
+    claimed: statistical
+    evidence: [proof, benchmark]
+    domain: alignment
+    loop: rlhf
+    concepts: [kl-regulator, open-vs-closed, preference-setpoint]
+    bridge: rigorous
+    source: "arXiv:2305.18290"
+    verified: true
+    assumptions:
+      - id: dpo-bt-model
+        statement: Human preferences follow a Bradley-Terry model over a single latent reward.
+        status: assumed
+        check: null
+      - id: dpo-coverage
+        statement: The preference dataset covers the region the optimized policy will occupy.
+        status: assumed
+        check: null
+    notes: >-
+      Claimed statistical, and capped at empirical, because both of its assumptions are
+      unwatched. The closed form is real mathematics; what it is a closed form OF rests on
+      a preference model nobody verifies in deployment.
+
+  # =====================================================================================
+  # Claims the gate CAPS — the over-claims this repo exists to catch
+  # =====================================================================================
+
+  - id: mpc-humanoid-safe
+    statement: Our model predictive controller keeps the humanoid upright.
+    claimed: robust
+    evidence: [hardware, simulation]
+    domain: robotics
+    loop: whole-body-mpc
+    concepts: [mpc, lyapunov-function]
+    bridge: rigorous
+    source: Folklore claim, stated in this form across many robotics papers and demos
+    verified: false
+    assumptions:
+      - id: mpc-model-match
+        statement: The rigid-body dynamics model matches the real robot closely enough over the horizon.
+        status: assumed
+        check: null
+        breaks_when: Payload changes, a joint wears, or the robot contacts something unmodelled.
+      - id: mpc-solve-time
+        statement: The optimizer returns a feasible solution within the control period.
+        status: monitored
+        check: Per-solve timing watchdog; a miss re-applies the last feasible solution.
+    notes: >-
+      THE canonical over-claim, and the reason this repo exists. "We used an MPC, therefore
+      it is safe" is caught here by arithmetic rather than by taste: the stability theorem
+      is about the MODEL, and the model-match assumption is unchecked.
+
+  - id: rlhf-aligned
+    statement: Reinforcement learning from human feedback makes the model aligned with human values.
+    claimed: robust
+    evidence: [benchmark, ablation]
+    domain: alignment
+    loop: rlhf
+    concepts: [preference-setpoint, reward-model, kl-regulator]
+    bridge: analogy
+    source: Ambient claim in alignment discourse, not any single paper
+    verified: false
+    assumptions:
+      - id: rlhf-rm-valid
+        statement: The reward model remains a valid measurement of human preference off its training distribution.
+        status: assumed
+        check: null
+        breaks_when: The policy moves off-distribution, which is precisely what optimizing against it does.
+      - id: rlhf-preference-aggregation
+        statement: Heterogeneous human preferences aggregate into one scalar without losing what matters.
+        status: assumed
+        check: null
+      - id: rlhf-raters-representative
+        statement: The rater pool represents the population the model will serve.
+        status: assumed
+        check: null
+    notes: >-
+      Tagged `analogy` AND claiming robust, so the gate refuses rather than caps. The
+      control mapping here is a metaphor: there is no plant model, no stability proof, and
+      the sensor is trained on the distribution the plant is about to leave.
+
+  - id: sim2real-locomotion
+    statement: >-
+      Domain randomization closes the simulation-to-reality gap for legged locomotion
+      policies.
+    claimed: statistical
+    evidence: [hardware, simulation, benchmark]
+    domain: physical-ai
+    loop: legged-locomotion
+    concepts: [sysid, robust-vs-adaptive]
+    bridge: rigorous
+    source: "arXiv:1710.06537; arXiv:1901.08652"
+    verified: true
+    assumptions:
+      - id: dr-coverage
+        statement: The randomization distribution contains the real robot's actual dynamics.
+        status: assumed
+        check: null
+        breaks_when: The real parameters fall outside the sampled range — and nothing reports when they do.
+      - id: dr-actuator-model
+        statement: The learned actuator model captures the real drive's torque response.
+        status: monitored
+        check: Deployment-time comparison of commanded versus measured torque.
+    notes: >-
+      A real and important result, capped honestly. Randomization buys coverage, not a
+      bound: nobody checks that the true parameters were inside the sampled set, which is
+      exactly the assumption the guarantee would need.
+
+  - id: world-model-planning-safe
+    statement: Planning inside a learned world model produces reliable behaviour in the real environment.
+    claimed: robust
+    evidence: [simulation, benchmark]
+    domain: world-models
+    loop: world-model-planning
+    concepts: [mpc, sysid, error-accumulation]
+    bridge: rigorous
+    source: "arXiv:2301.04104; arXiv:2310.16828"
+    verified: true
+    assumptions:
+      - id: wm-error-bounded
+        statement: Model error stays small over the planning horizon.
+        status: assumed
+        check: null
+        breaks_when: The planner finds and exploits exactly the states where the model is wrong.
+      - id: wm-coverage
+        statement: The training data covers the states the planner will visit.
+        status: assumed
+        check: null
+    notes: >-
+      The deepest unsolved problem in the field, stated as a capped claim. A planner is an
+      adversary against its own model: it searches for high-value states, and model error is
+      highest exactly where data was thinnest.
+
+  - id: autoscaling-slo
+    statement: Autoscaling keeps the inference service within its latency objective.
+    claimed: statistical
+    evidence: [benchmark]
+    domain: infra
+    loop: llm-serving
+    concepts: [feedback, dead-time, saturation-antiwindup]
+    bridge: analogy
+    source: Standard operational claim in serving deployments
+    verified: false
+    assumptions:
+      - id: as-stationary
+        statement: The arrival process is stationary enough that past load predicts near-future load.
+        status: assumed
+        check: null
+        breaks_when: A traffic spike arrives faster than the scale-up delay.
+      - id: as-no-retry-storm
+        statement: Client retries do not amplify load during a degradation.
+        status: assumed
+        check: null
+        breaks_when: Clients retry on timeout, which adds load exactly when the system is overloaded.
+    notes: >-
+      Retry amplification is positive feedback with a well-known fix (jitter plus circuit
+      breaking) that every generation of engineers rediscovers. Leaving it `assumed` is how
+      an outage gets written.
+
+  - id: constitutional-classifiers-robust
+    statement: Constitutional classifiers defend against universal jailbreaks.
+    claimed: robust
+    evidence: [benchmark, ablation]
+    domain: alignment
+    concepts: [safety-filter, observability]
+    bridge: analogy
+    source: "arXiv:2501.18837"
+    verified: true
+    assumptions:
+      - id: cc-redteam-coverage
+        statement: Thousands of hours of red-teaming cover the attack distribution real adversaries will use.
+        status: assumed
+        check: null
+        breaks_when: A qualitatively new attack class appears that the red-team never tried.
+      - id: cc-independent-channel
+        statement: The classifier fails independently of the model it guards.
+        status: monitored
+        check: Separate model and training data for the classifier; disagreement rate tracked.
+    notes: >-
+      Measured red-teaming is genuinely strong evidence and this is careful work. But
+      coverage of an adversarial distribution cannot be established by sampling it, so the
+      honest level is empirical.
+
+  - id: self-refine-improves
+    statement: Having a model critique and revise its own output reliably improves quality.
+    claimed: statistical
+    evidence: [benchmark]
+    domain: agentic
+    loop: agent-loop
+    concepts: [feedback, observability]
+    bridge: analogy
+    source: "arXiv:2303.17651"
+    verified: true
+    assumptions:
+      - id: sr-independent-sensor
+        statement: The critic is an independent measurement of quality, not the same system judging itself.
+        status: violated
+        breaks_when: Always, when critic and generator are the same model — which is the setup.
+    notes: >-
+      REFUSED, not capped. The first rule of instrumentation is that you never close a loop
+      on your own instrument. Self-critique improves results when an EXTERNAL signal (tests,
+      a compiler, the environment) is in the loop, and plateaus or drifts without one.
+
+  - id: agent-loop-reliable
+    statement: >-
+      An agent loop with enough tool access and enough steps will reliably complete
+      long-horizon tasks.
+    claimed: robust
+    evidence: [benchmark]
+    domain: agentic
+    loop: agent-loop
+    concepts: [error-accumulation, feedback, open-vs-closed]
+    bridge: analogy
+    source: Ambient claim in agent-framework marketing
+    verified: false
+    assumptions:
+      - id: al-errors-independent
+        statement: Per-step errors are independent, so success decays gracefully with horizon.
+        status: violated
+        breaks_when: >-
+          Always. The model reads its own earlier mistakes and conditions on them, which is
+          positive feedback, not independent noise.
+    notes: >-
+      REFUSED. Measured decomposition of long-horizon failure shows self-conditioning on
+      prior errors, and separate work argues errors arrive in avalanches rather than as
+      noise. This is a loop with positive feedback and no fallback.
+
+  - id: lqg-optimal-safe
+    statement: >-
+      Because the linear quadratic Gaussian controller is optimal, it has good stability
+      margins.
+    claimed: robust
+    evidence: [proof]
+    domain: aerospace
+    loop: fly-by-wire
+    concepts: [lqg, margins, separation-principle]
+    bridge: rigorous
+    source: "Refuted by 10.1109/TAC.1978.1101812"
+    verified: true
+    assumptions:
+      - id: lqg-optimality-implies-margin
+        statement: Optimality with respect to a quadratic cost implies a guaranteed stability margin.
+        status: violated
+        breaks_when: >-
+          Always. Doyle's 1978 counterexample constructs an LQG design whose gain margin is
+          arbitrarily close to zero.
+    notes: >-
+      Carried deliberately as the historical anchor. The field believed this for years; two
+      pages of counterexample ended it. Any claim in this repo of the form "it is optimal,
+      therefore it is safe" should be checked against this row.
+
+  - id: mcas-single-sensor
+    statement: >-
+      A single angle-of-attack sensor provides adequate input for a control law with
+      repeated trim authority.
+    claimed: robust
+    evidence: [claim]
+    domain: aerospace
+    loop: fly-by-wire
+    concepts: [observability, saturation-antiwindup, margins]
+    source: Historical design assumption, examined at length in subsequent investigations
+    verified: false
+    assumptions:
+      - id: mcas-sensor-single-point
+        statement: A single sensor channel will not fail in a way that commands sustained nose-down trim.
+        status: violated
+        breaks_when: The sensor fails. There is no second channel to vote it out.
+      - id: mcas-authority-bounded
+        statement: The control law's cumulative trim authority is bounded within what the crew can overcome.
+        status: violated
+        breaks_when: The law re-triggers, accumulating authority across activations.
+    notes: >-
+      Carried as the field's most-studied lesson about AUTHORITY and REDUNDANCY, the two
+      LoopCard fields people skip. The control-theoretic reading is narrow and specific: a
+      loop with a single-point sensor and accumulating actuator authority has no margin
+      against that sensor. Every agent framework that grants unbounded tool authority from a
+      single unverified signal is the same structure.
+
+  - id: guidance-scale-quality
+    statement: Increasing the guidance scale makes generated images better match the prompt.
+    claimed: statistical
+    evidence: [benchmark]
+    domain: genai
+    loop: diffusion-sampling
+    concepts: [guidance-gain, reverse-sde]
+    bridge: rigorous
+    source: "arXiv:2207.12598"
+    verified: true
+    assumptions:
+      - id: gs-monotone
+        statement: The relationship between guidance scale and quality is monotone.
+        status: violated
+        breaks_when: Past a model-dependent scale, outputs saturate and degrade — the signature of excess gain.
+    notes: >-
+      REFUSED as stated, and the refusal is the teaching. "More gain is better" is false in
+      every control system ever built, and diffusion guidance is no exception. The correct
+      claim names an operating range.
+
+  - id: rm-proxy-safe
+    statement: Optimizing harder against the reward model keeps improving the true objective.
+    claimed: statistical
+    evidence: [benchmark, ablation]
+    domain: alignment
+    loop: rlhf
+    concepts: [goodhart, reward-model, kl-regulator]
+    bridge: rigorous
+    source: "Refuted by arXiv:2210.10760"
+    verified: true
+    assumptions:
+      - id: rm-proxy-monotone
+        statement: True reward increases monotonically with proxy reward.
+        status: violated
+        breaks_when: Past a measurable knee in the square root of the KL divergence, true quality declines.
+    notes: >-
+      REFUSED, and unusually well-measured: the overoptimization curve has a fitted shape
+      with a locatable knee. This is the field's one genuinely quantitative control law
+      about alignment, and it says stop early.
+
+  - id: vla-zero-shot-embodiment
+    statement: Vision-language-action policies transfer zero-shot to robot bodies they have never seen.
+    claimed: statistical
+    evidence: [benchmark]
+    domain: physical-ai
+    loop: legged-locomotion
+    concepts: [sysid, robust-vs-adaptive]
+    bridge: analogy
+    source: Cross-embodiment transfer literature, 2024-2026
+    verified: false
+    assumptions:
+      - id: vla-strict-zeroshot
+        statement: The evaluation embodiment was genuinely absent from pretraining.
+        status: assumed
+        check: null
+        breaks_when: >-
+          Much reported zero-shot transfer is pretrain-exposed rather than strictly unseen;
+          benchmarks have only recently begun separating the two.
+      - id: vla-action-space-aligned
+        statement: The action space of the new embodiment maps onto the pretrained one.
+        status: assumed
+        check: null
+    notes: >-
+      Capped, not refused — real progress is happening here. The assumption worth watching
+      is the definition of "unseen", which benchmarks are only now pinning down.
+
+  - id: pacs-beats-cbf
+    statement: >-
+      Braking a diffusion policy along its own path preserves more task success than
+      nudging it sideways with a control barrier function filter.
+    claimed: statistical
+    evidence: [hardware, ablation]
+    domain: robotics
+    loop: whole-body-mpc
+    concepts: [safety-filter, cbf]
+    bridge: rigorous
+    source: "arXiv:2511.06385"
+    verified: true
+    assumptions:
+      - id: pacs-distribution
+        statement: Staying on the policy's own path keeps it inside its training distribution.
+        status: assumed
+        check: null
+      - id: pacs-path-safe
+        statement: The policy's own path, traversed more slowly, remains safe.
+        status: assumed
+        check: null
+        breaks_when: The path itself leads into the unsafe set, where slowing down does not help.
+    notes: >-
+      A genuinely interesting 2026 result and a real tension with the CBF orthodoxy: a
+      minimally-invasive safety filter can be minimally invasive in the WRONG METRIC, pushing
+      a learned policy off-distribution. Capped because the safety of the underlying path is
+      assumed rather than established.
+
+  - id: world-model-replaces-real-data
+    statement: Policies trained entirely on world-model-generated data deploy successfully to real robots.
+    claimed: robust
+    evidence: [hardware, simulation]
+    domain: world-models
+    loop: world-model-planning
+    concepts: [sysid, mpc]
+    bridge: rigorous
+    source: World-model policy-training results, 2026
+    verified: false
+    assumptions:
+      - id: wmr-physics-fidelity
+        statement: The generated data is physically correct in the regimes the policy will exploit.
+        status: assumed
+        check: null
+        breaks_when: A generative model that looks right can be physically wrong exactly where it matters.
+      - id: wmr-eval-independent
+        statement: Evaluation is independent of the world model that produced the training data.
+        status: assumed
+        check: null
+        breaks_when: >-
+          When the same world model both trains and evaluates the policy, this is the
+          self-critique failure mode with extra steps.
+    notes: >-
+      The strongest claim in the 2026 world-model literature, capped hard. The second
+      assumption matters most: world models are increasingly used as the EVALUATOR too, and
+      a loop that grades itself has no independent sensor.
+
+  - id: neural-controller-verified
+    statement: Neural network controllers can be formally verified before deployment.
+    claimed: certified
+    evidence: [proof, benchmark]
+    domain: driving
+    loop: av-stack
+    concepts: [reachability, safety-filter]
+    bridge: rigorous
+    source: Neural-network verification literature (VNN-COMP lineage)
+    verified: false
+    assumptions:
+      - id: nnv-scale
+        statement: Verification tractability extends to the network sizes actually deployed.
+        status: violated
+        breaks_when: >-
+          Sound verification is industrial-grade at competition scale and roughly six orders
+          of magnitude short of a frontier model.
+      - id: nnv-closed-loop
+        statement: Verifying the network in isolation implies safety of the network in closed loop with the plant.
+        status: assumed
+        check: null
+    notes: >-
+      REFUSED as stated, and the honest version is valuable: open-loop robustness
+      verification IS industrial-grade at small scale, and the practical pattern is
+      "verify the backup controller, monitor the primary" — which is the Simplex architecture.
+
+  - id: context-engineering-controls-agents
+    statement: Managing the context window is how you control a frozen-weight agent.
+    claimed: robust
+    evidence: [benchmark, analogy]
+    domain: agentic
+    loop: agent-loop
+    concepts: [context-as-actuator, saturation-antiwindup]
+    bridge: analogy
+    source: "Context-engineering practice, 2025-2026"
+    verified: true
+    assumptions:
+      - id: ce-observable
+        statement: The effect of a context change on behaviour is predictable enough to steer by.
+        status: assumed
+        check: null
+      - id: ce-budget
+        statement: The relevant information fits inside the context budget.
+        status: monitored
+        check: Token accounting with compaction triggered at a threshold.
+    notes: >-
+      REFUSED at robust because the bridge is tagged `analogy`. The framing is genuinely
+      useful — naming the manipulated variable is real progress — but calling context
+      assembly "the controlled variable" is a metaphor until somebody writes the transfer
+      function.
+
+  - id: shielding-safe-rl
+    statement: Shielding makes reinforcement learning safe during training and deployment.
+    claimed: certified
+    evidence: [proof, simulation]
+    domain: agentic
+    concepts: [safety-filter, simplex-architecture]
+    bridge: rigorous
+    source: "arXiv:1708.08611"
+    verified: true
+    assumptions:
+      - id: shield-spec-complete
+        statement: The temporal-logic specification captures everything that counts as unsafe.
+        status: assumed
+        check: null
+        breaks_when: The specification is a human artefact and omissions are invisible until exercised.
+      - id: shield-abstraction-sound
+        statement: The discrete abstraction used to synthesise the shield is sound for the real system.
+        status: monitored
+        check: Runtime check that observed transitions remain within the abstraction.
+    notes: >-
+      Capped from certified to empirical. The synthesis is sound; the SPECIFICATION is the
+      unverified part, and it always is. "Safe with respect to what we wrote down" is the
+      only guarantee any formal method offers.
+
+  - id: insulin-closed-loop
+    statement: Closed-loop insulin delivery keeps blood glucose in range better than open-loop dosing.
+    claimed: statistical
+    evidence: [hardware, ablation, benchmark]
+    domain: medicine
+    loop: artificial-pancreas
+    concepts: [feedback, dead-time, saturation-antiwindup]
+    source: Clinical literature on automated insulin delivery
+    verified: false
+    assumptions:
+      - id: ap-absorption-model
+        statement: The insulin absorption model matches this patient, today.
+        status: monitored
+        check: Continuous glucose trajectory compared against prediction; adaptation and alerts on divergence.
+      - id: ap-sensor-accurate
+        statement: The continuous glucose sensor reading is accurate enough to act on.
+        status: monitored
+        check: Periodic fingerstick calibration and sensor-fault detection.
+      - id: ap-meals-announced
+        statement: Meals are announced, or the controller detects them fast enough.
+        status: assumed
+        check: null
+        breaks_when: An unannounced large meal outruns the controller's detection and the insulin's onset.
+    notes: >-
+      Capped to empirical by the meal assumption, which is the honest state of the art. The
+      design lesson worth transferring: the controller is DELIBERATELY DETUNED because the
+      risk is asymmetric — too little insulin is slow harm, too much is acute. Most AI
+      safety loops have symmetric-risk tuning on an asymmetric-risk problem.
+
+  - id: flash-crash-circuit-breaker
+    statement: Circuit breakers prevent a liquidity cascade from becoming a market-wide crash.
+    claimed: robust
+    evidence: [claim]
+    domain: markets
+    loop: market-loop
+    concepts: [feedback, dead-time, waterbed]
+    source: Post-2010 market-structure reforms
+    verified: false
+    assumptions:
+      - id: cb-timescale
+        statement: The supervisory action is fast enough relative to the participants it supervises.
+        status: assumed
+        check: null
+        breaks_when: Participants act in microseconds and the exchange's halt takes seconds to minutes.
+      - id: cb-no-displacement
+        statement: Halting one venue does not simply displace the cascade to another.
+        status: assumed
+        check: null
+    notes: >-
+      Capped hard. The timescale assumption is the interesting one: a supervisory controller
+      six orders of magnitude slower than its plant is not a controller, it is a post-mortem.
+
+  - id: process-reward-better
+    statement: Step-level process rewards produce more reliable reasoning than outcome-only rewards.
+    claimed: statistical
+    evidence: [benchmark, ablation]
+    domain: alignment
+    concepts: [process-reward, goodhart]
+    bridge: analogy
+    source: "arXiv:2305.20050"
+    verified: true
+    assumptions:
+      - id: pr-step-labels
+        statement: Step-level labels are themselves reliable.
+        status: assumed
+        check: null
+      - id: pr-no-step-hacking
+        statement: The policy does not learn to produce steps that score well without being correct.
+        status: assumed
+        check: null
+        breaks_when: A denser sensor is a denser surface to hack.
+    notes: >-
+      Capped. Dense feedback is a real improvement AND a larger attack surface: every extra
+      measurement point is another thing Goodhart can act on.
+
+  - id: vlm-reward-model
+    statement: Vision-language models can serve as general-purpose reward functions for robot learning.
+    claimed: statistical
+    evidence: [benchmark]
+    domain: physical-ai
+    concepts: [reward-model, goodhart]
+    bridge: analogy
+    source: Multimodal reward-modelling literature, 2025-2026
+    verified: false
+    assumptions:
+      - id: vlm-rm-not-hackable
+        statement: The policy does not learn to satisfy the vision-language judge without doing the task.
+        status: violated
+        breaks_when: >-
+          Measured reward-hacking rates under outcome-only multimodal rewards are substantial,
+          and reinforcement learning creates new failure modes rather than only inheriting them.
+    notes: >-
+      REFUSED. A cheap sensor that can be fooled is not a cheap sensor; it is an expensive
+      one whose cost arrives later.
+
+  - id: hierarchy-fixes-horizon
+    statement: Hierarchical decomposition solves long-horizon robot task execution.
+    claimed: robust
+    evidence: [hardware, benchmark]
+    domain: physical-ai
+    concepts: [error-accumulation, dynamic-programming]
+    bridge: rigorous
+    source: Long-horizon manipulation literature, 2026
+    verified: false
+    assumptions:
+      - id: hier-subgoal-correct
+        statement: The high-level planner's subgoals are achievable and correctly ordered.
+        status: assumed
+        check: null
+      - id: hier-recovery
+        statement: A failed subgoal can be detected and retried without corrupting the rest of the plan.
+        status: monitored
+        check: Per-subgoal success detection with replanning on failure.
+    notes: >-
+      Capped from robust to empirical. Hierarchy is the consensus architecture and it
+      genuinely helps — outer-loop planning over inner-loop execution is exactly the
+      two-rate cascade control has always used. It does not make the horizon problem go
+      away; it moves the error to the subgoal boundary.
+
+  - id: two-rate-vla
+    statement: >-
+      A slow vision-language planner over a fast low-level controller meets real-time
+      control requirements for humanoid manipulation.
+    claimed: robust
+    evidence: [hardware]
+    domain: physical-ai
+    loop: legged-locomotion
+    concepts: [dead-time, mpc]
+    bridge: rigorous
+    source: Two-rate VLA architectures, 2025-2026
+    verified: false
+    assumptions:
+      - id: tr-inner-stabilises
+        statement: The fast inner loop stabilises the system between slow outer-loop updates.
+        status: monitored
+        check: Inner-loop tracking error monitored; degradation triggers a safe pose.
+      - id: tr-chunk-valid
+        statement: An action chunk emitted open-loop stays valid for its whole duration.
+        status: assumed
+        check: null
+        breaks_when: The world changes during the chunk — which is what open-loop execution means.
+    notes: >-
+      Capped. This is the single most control-theoretically literate pattern in modern
+      robot learning: an explicit two-rate cascade. The honest weak point is that action
+      chunking is open-loop execution inside a closed-loop system, and the chunk length is
+      a bet on how fast the world changes.
+
+  - id: eval-measures-safety
+    statement: Passing a safety evaluation suite means the deployed system is safe.
+    claimed: statistical
+    evidence: [benchmark]
+    domain: alignment
+    concepts: [observability, goodhart]
+    bridge: analogy
+    source: Ambient assumption in AI deployment practice
+    verified: false
+    assumptions:
+      - id: eval-snapshot
+        statement: An evaluation snapshot predicts behaviour under the deployment distribution.
+        status: assumed
+        check: null
+        breaks_when: The deployment distribution is adversarial, open-ended, and unlabelled.
+      - id: eval-not-optimized-against
+        statement: The system was not optimized against the evaluation itself.
+        status: assumed
+        check: null
+        breaks_when: Once an eval is a target, it stops being a measurement.
+    notes: >-
+      Capped to empirical, and this row is aimed squarely at our own industry. An eval is a
+      SENSOR reading taken once, before deployment. Calling it a guarantee is the same error
+      as calibrating a thermometer in the factory and never reading it again.
+
+  - id: solve-time-bounded
+    statement: The whole-body optimizer meets its real-time deadline.
+    claimed: certified
+    evidence: [benchmark, hardware]
+    domain: robotics
+    loop: whole-body-mpc
+    concepts: [dead-time, mpc]
+    bridge: rigorous
+    source: Real-time MPC deployment practice
+    verified: false
+    assumptions:
+      - id: st-worst-case
+        statement: The measured worst-case solve time bounds the true worst case.
+        status: assumed
+        check: null
+        breaks_when: >-
+          Solve time depends on problem difficulty, so the worst case arrives with the
+          hardest situation — which is also when you most need the deadline met.
+    notes: >-
+      Capped from certified to empirical, and this is the quiet one. A controller whose
+      period depends on the difficulty of the problem it is solving has a VARIABLE DELAY,
+      and variable delay is the hardest kind to hold a margin against. Aerospace demands
+      static worst-case execution time analysis for exactly this reason; robotics measures
+      a histogram and calls it bounded.

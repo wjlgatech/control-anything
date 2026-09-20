@@ -1,0 +1,475 @@
+# Deployed applications — control loops that are already load-bearing in the real world.
+#
+# THE SINGLE MOST IMPORTANT FINDING in this file, and the reason it exists: almost nothing
+# here claims `certified`, and where it does, "certified" means a pass/fail TRACK TEST or a
+# PROCESS STANDARD — never a proof that the deployed loop is stable. Every machine-learning
+# controller listed tops out at `empirical` or `statistical`, with safety delegated to a
+# constraint layer plus a human override rather than to the learned policy itself.
+#
+# That is not a criticism of the field. It is the template: the learned part is ALLOWED to
+# be untrustworthy because something else holds the guarantee.
+
+applications:
+  # ---- aerospace ------------------------------------------------------------------
+  - id: a320-envelope
+    name: Airbus A320 fly-by-wire envelope protection
+    domain: aerospace
+    controlled_variable: Angle of attack held below alpha-max, and load factor clamped
+    controller: Computers between stick and surfaces that refuse commands outside a box
+    claimed_level: certified
+    concepts: [saturation-antiwindup, margins, controllability]
+    lesson: >-
+      Protections are only as good as their sensors. A blocked angle-of-attack probe
+      degrades the aircraft out of normal law — the guarantee is conditional on the sensor.
+    verified: true
+
+  - id: mcas
+    name: Boeing 737 MAX MCAS
+    domain: aerospace
+    controlled_variable: Stick-force feel at high angle of attack, via horizontal stabilizer trim
+    controller: Trim augmentation triggered from a single angle-of-attack sensor at a time
+    claimed_level: certified
+    concepts: [observability, saturation-antiwindup, margins]
+    lesson: >-
+      The single-sensor story is only half the defect. The other half is that PILOT TRIM
+      INPUTS RESET MCAS, letting it re-fire indefinitely — authority accumulated faster
+      than the outer loop could cancel it. Authority plus reset, not just redundancy.
+    verified: true
+
+  - id: apollo-lm
+    name: Apollo Lunar Module digital autopilot and powered descent guidance
+    domain: aerospace
+    controlled_variable: Vehicle attitude, descent engine throttle, and the targeted landing point
+    controller: Polynomial-target guidance on a priority-preemptive executive with restart protection
+    claimed_level: empirical
+    concepts: [dynamic-programming, saturation-antiwindup]
+    lesson: >-
+      The 1201/1202 alarms during the Apollo 11 descent were not a software defect — a
+      hardware interface stole duty cycle, and RESTART PROTECTION shed low-priority jobs
+      and saved the landing. Graceful degradation under overload, designed in advance.
+    verified: true
+
+  - id: falcon9-landing
+    name: SpaceX Falcon 9 first-stage return and landing
+    domain: aerospace
+    controlled_variable: Touchdown position and velocity
+    controller: Onboard convex optimization re-solving the divert trajectory as a second-order cone program
+    claimed_level: robust
+    concepts: [mpc, maximum-principle, reachability]
+    lesson: >-
+      A rare case where the guarantee is real and stated as a dispersion target rather than
+      a vibe. Both early failures were ACTUATOR failures — hydraulic fluid exhaustion and a
+      slow throttle valve — not guidance failures.
+    verified: true
+
+  # ---- automotive -----------------------------------------------------------------
+  - id: abs
+    name: Anti-lock braking system
+    domain: driving
+    controlled_variable: Wheel slip held near the peak-friction point
+    controller: Rule-based pressure cycling per wheel, many times a second
+    claimed_level: statistical
+    concepts: [feedback, saturation-antiwindup]
+    lesson: >-
+      THE CLEANEST CAUTIONARY TALE HERE. The controller did exactly what it was designed to
+      do on wheel slip, and the fleet evaluation found fatal single-vehicle run-off-road
+      crashes went UP, roughly offsetting the gains elsewhere. A verified local optimum with
+      a worse global outcome. The loop closed around the tire, not around the driver.
+    verified: true
+
+  - id: esc
+    name: Electronic stability control
+    domain: driving
+    controlled_variable: Yaw rate, driven toward the rate the steering angle and speed imply the driver intended
+    controller: Individual wheel braking to induce a correcting yaw moment, compared many times a second
+    claimed_level: certified
+    concepts: [feedback, internal-model-principle]
+    lesson: >-
+      Certified in the meaningful sense — a mandated pass/fail manoeuvre with numeric
+      thresholds. One of the largest verified safety wins in automotive history, and it
+      works by inferring the reference (what the driver MEANT) rather than measuring it.
+    verified: true
+
+  - id: acc
+    name: Radar adaptive cruise control
+    domain: driving
+    controlled_variable: Headway to the vehicle ahead, plus set speed when clear
+    controller: Radar-fed gap regulator commanding engine torque and limited braking
+    claimed_level: empirical
+    concepts: [feedback, dead-time]
+    lesson: >-
+      Radar adaptive cruise is poor at STATIONARY obstacles — a sensor blind spot, not a
+      controller flaw. The manufacturer explicitly keeps the driver responsible, which is
+      an honest statement that the loop is not closed on the thing that matters.
+    verified: true
+
+  - id: platooning
+    name: Vehicle platooning and string stability
+    domain: driving
+    controlled_variable: Whether a disturbance at the front shrinks or grows passing back down the line
+    controller: Autonomous adaptive cruise (sensing only) versus cooperative control (with a radio feed forward)
+    claimed_level: robust
+    concepts: [small-gain, dead-time, margins]
+    lesson: >-
+      A proved impossibility with a deployed consequence: with constant-distance spacing,
+      string stability CANNOT be achieved with one-vehicle look-ahead. No amount of onboard
+      sensor tuning fixes it — you need information the sensor cannot provide. Meanwhile
+      commercially deployed adaptive cruise is measurably NOT string stable, because
+      manufacturers tuned for individual comfort.
+    verified: true
+
+  - id: waymo
+    name: Waymo Driver, rider-only operation
+    domain: driving
+    controlled_variable: The entire dynamic driving task
+    controller: Perception, prediction, planning, and tracking, wrapped in a documented safety case
+    claimed_level: statistical
+    concepts: [reachability, mpc, observer]
+    lesson: >-
+      The guarantee is a peer-reviewed fleet crash-rate comparison against a human benchmark
+      in the same geography — not a stability proof. This is the honest ceiling for a
+      learned driving loop, and stating it as statistical rather than certified is exactly
+      right.
+    verified: true
+
+  # ---- process and industrial -----------------------------------------------------
+  - id: pid-survey
+    name: Industrial PID loop performance, global survey
+    domain: energy
+    controlled_variable: Flow, pressure, level, and temperature at operator setpoints
+    controller: Single-loop three-term (PID) control
+    claimed_level: statistical
+    concepts: [feedback, saturation-antiwindup]
+    lesson: >-
+      THE NUMBER EVERY AI ENGINEER SHOULD KNOW. Of tens of thousands of industrial
+      controllers surveyed across refineries, paper, chemicals, power and metals: roughly a
+      third performed acceptably, and over a THIRD WERE EFFECTIVELY OPEN LOOP — in manual,
+      or with the output saturated. The survey's own gloss is that this had not improved in
+      seven years. The mature discipline's deployed reality is mostly untuned loops.
+    verified: true
+
+  - id: dmc-fccu
+    name: Dynamic Matrix Control on a fluid catalytic cracking unit
+    domain: energy
+    controlled_variable: Multiple refinery outputs moved together from a truncated step-response prediction
+    controller: Multivariable step-response model predictive control
+    claimed_level: empirical
+    concepts: [mpc, sysid]
+    lesson: >-
+      The founding application of industrial MPC, and its famous evidence is a STORY, not a
+      statistic: it reportedly ran autonomously for five weeks during a strike. No stability
+      proof. The proof came twenty years later, after the technology was already everywhere.
+    verified: true
+
+  - id: dual-composition
+    name: Dual-composition control of high-purity distillation
+    domain: energy
+    controlled_variable: Top and bottom product purity simultaneously
+    controller: Multivariable MPC on an identified response model
+    claimed_level: empirical
+    concepts: [sysid, persistence-excitation, mu-synthesis]
+    lesson: >-
+      GAIN DIRECTIONALITY, and it is the sharpest identification lesson in the file: the
+      low-gain direction is badly excited by ordinary plant tests, so the identified model
+      is WRONG EXACTLY WHERE the controller needs it to be right. Industry's practical
+      answer is to give up and control one end. Persistence of excitation is not a
+      technicality.
+    verified: true
+
+  # ---- power ----------------------------------------------------------------------
+  - id: grid-frequency
+    name: Grid primary and secondary frequency control
+    domain: energy
+    controlled_variable: System frequency, then area control error driven to zero
+    controller: Proportional governor droop with a mandated deadband, plus centralized integral dispatch
+    claimed_level: statistical
+    concepts: [feedback, internal-model-principle, margins]
+    lesson: >-
+      Droop is PROPORTIONAL ONLY — it arrests frequency but never restores it. That is why
+      a slower integral layer exists on top. A two-rate cascade, mandated by standard,
+      running continuously across a continent.
+    verified: true
+
+  - id: blackout-2003
+    name: 2003 Northeast blackout
+    domain: energy
+    controlled_variable: Line loading and voltage, with human operators closing the loop
+    controller: Alarm processing and contingency analysis feeding operator action
+    claimed_level: anecdote
+    concepts: [observability, dead-time]
+    lesson: >-
+      THE SENSOR FAILED SILENTLY. The alarm processor stopped producing valid alarms while
+      data built up and overflowed its input buffers, leaving operators blind for over an
+      hour — reading "no alarms" as "no problem". Any monitor a system depends on needs a
+      heartbeat proving it is alive.
+    verified: true
+
+  - id: iberian-2025
+    name: 2025 Iberian peninsula blackout
+    domain: energy
+    controlled_variable: Grid voltage and reactive power — the loop that had no firm owner
+    controller: Distributed voltage regulation with asymmetric obligations across generator types
+    claimed_level: empirical
+    concepts: [feedback, passivity, margins]
+    lesson: >-
+      The expert finding was that renewables were not the problem — VOLTAGE CONTROL was.
+      Thermal plants were obliged to regulate voltage dynamically and renewable generation
+      was not, so as the mix shifted, a control responsibility quietly went unassigned. An
+      unowned loop is an open loop.
+    verified: true
+
+  - id: dc-cooling
+    name: Datacenter cooling under learned control
+    domain: infra
+    controlled_variable: Cooling system setpoints, updated on a five-minute cycle
+    controller: A learned model proposing setpoints behind a two-layer safety envelope
+    claimed_level: empirical
+    concepts: [simplex-architecture, safety-filter, mpc]
+    lesson: >-
+      THE CLOSEST THING IN DEPLOYED PRACTICE TO A TEMPLATE FOR SAFE AGENTIC AI. Actions are
+      vetted against operator-defined constraints AND re-verified by the local control
+      system, low-confidence actions are discarded, there is automatic failover to
+      heuristics, and an operator can exit at any time. It earns its large energy savings
+      PRECISELY BECAUSE the learned part is allowed to be untrustworthy.
+    verified: true
+
+  # ---- medicine -------------------------------------------------------------------
+  - id: hybrid-closed-loop-insulin
+    name: Hybrid closed-loop insulin delivery
+    domain: medicine
+    controlled_variable: Blood glucose from a continuous monitor, driven toward a fixed target
+    controller: Automatic basal-rate feedback, updated every five minutes
+    claimed_level: empirical
+    concepts: [feedback, dead-time, saturation-antiwindup]
+    lesson: >-
+      Users get ejected from the loop. In real-world follow-up a meaningful fraction
+      abandoned automatic mode within months, triggered by missed calibrations and missed
+      meal entries. A controller that demands correct human input on a schedule has a human
+      in its feedback path whether it modelled one or not.
+    verified: true
+
+  - id: mpc-insulin
+    name: Model-predictive automated insulin delivery
+    domain: medicine
+    controlled_variable: Predicted future glucose, via basal insulin and automatic corrections
+    controller: Model predictive control
+    claimed_level: statistical
+    concepts: [mpc, dead-time]
+    lesson: >-
+      A randomized controlled trial with a real effect size — genuinely statistical, and one
+      of the few loops in this file whose guarantee was earned the way medicine earns them.
+    verified: true
+
+  - id: closed-loop-anesthesia
+    name: Closed-loop anaesthesia and automated sedation
+    domain: medicine
+    controlled_variable: Depth-of-hypnosis index held at a target
+    controller: Closed-loop infusion controllers driving anaesthetic and analgesic agents
+    claimed_level: statistical
+    concepts: [feedback, observer, robust-vs-adaptive]
+    lesson: >-
+      A certified automated sedation system was commercially withdrawn after minimal
+      adoption — killed by the constraints its own certification required. Certification is
+      not only a bar to clear; it is a box you then have to live inside.
+    verified: true
+
+  - id: adaptive-dbs
+    name: Adaptive deep brain stimulation
+    domain: medicine
+    controlled_variable: Stimulation parameters adjusted from sensed local field potentials
+    controller: Closed-loop neurostimulation
+    claimed_level: empirical
+    concepts: [feedback, observer]
+    lesson: >-
+      The regulatory language is carefully hedged — adaptive stimulation MAY offer improved
+      symptom control. When the plant is a brain, an honest `empirical` is the right claim.
+    verified: true
+
+  - id: pacemaker
+    name: Rate-responsive cardiac pacing
+    domain: medicine
+    controlled_variable: Paced heart rate as a function of sensed metabolic demand
+    controller: Sensor-to-rate mapping plus threshold inhibit logic
+    claimed_level: empirical
+    concepts: [feedback, observability]
+    lesson: >-
+      Classic SENSOR SPOOFING: accelerometers misread external vibration as exercise, and
+      minute-ventilation sensors misread mechanical ventilation as exertion. The controller
+      is correct; the proxy is wrong. Every learned reward model should read this row.
+    verified: true
+
+  # ---- computing ------------------------------------------------------------------
+  - id: tcp-congestion
+    name: Loss-based TCP congestion control
+    domain: infra
+    controlled_variable: Congestion window — bytes in flight
+    controller: Additive-increase multiplicative-decrease, later a cubic growth function
+    claimed_level: empirical
+    concepts: [feedback, saturation-antiwindup]
+    lesson: >-
+      The most widely deployed feedback controller on Earth, and it is Standards Track with
+      NO formal stability guarantee. It also starves on high bandwidth-delay paths, because
+      loss is a very coarse sensor.
+    verified: true
+
+  - id: bbr
+    name: Model-based congestion control (BBR)
+    domain: infra
+    controlled_variable: Pacing rate and window, from an explicit model of bottleneck bandwidth and round-trip time
+    controller: Model-based rate control with a dual-timescale probing schedule
+    claimed_level: empirical
+    concepts: [sysid, mpc, feedback]
+    lesson: >-
+      Swapping a coarse sensor (loss) for an estimated model (bandwidth and delay) — the
+      exact move from classical to model-based control. And a control-theoretic analysis
+      later found oscillation against the incumbent that STEADY-STATE MODELS COULD NOT SEE.
+      Transient analysis is not optional.
+    verified: true
+
+  - id: hpa
+    name: Kubernetes horizontal pod autoscaling
+    domain: infra
+    controlled_variable: Replica count, moved so the observed metric hits its target
+    controller: Proportional ratio control with a deadband and asymmetric damping
+    claimed_level: empirical
+    concepts: [feedback, dead-time, saturation-antiwindup]
+    lesson: >-
+      The documentation has a dedicated section on flapping, and the deadband and
+      stabilization window exist precisely to damp the oscillation a bare proportional
+      controller produces. Control theory, rediscovered and named "stability of workload
+      scale".
+    verified: true
+
+  - id: admission-control
+    name: Database admission control
+    domain: infra
+    controlled_variable: Rate of work admitted, with priority queues
+    controller: Overload-triggered load shedding on measured saturation signals
+    claimed_level: empirical
+    concepts: [saturation-antiwindup, feedback]
+    lesson: >-
+      The design point IS the lesson: queueing inside an opaque scheduler is
+      undifferentiated, so overload is deliberately PULLED FORWARD into explicit priority
+      queues where it can be reasoned about. Make the saturation visible and controllable.
+    verified: true
+
+  - id: arc-cache
+    name: Adaptive replacement cache
+    domain: infra
+    controlled_variable: The split point between the recency list and the frequency list
+    controller: Self-tuning rule driven by hits in two ghost lists, with no user-set knob
+    claimed_level: empirical
+    concepts: [robust-vs-adaptive, sysid]
+    lesson: >-
+      The notable property is the ABSENCE OF A TUNING KNOB — the controller adapts its own
+      gain from a cheap auxiliary measurement. The ghost lists are a counterfactual sensor:
+      "what would I have hit if I had been configured differently?"
+    verified: true
+
+  - id: rapl-throttle
+    name: Processor power limiting and frequency throttling
+    domain: infra
+    controlled_variable: Running-average package power against a configured limit
+    controller: Hardware reactive feedback reducing maximum allowed frequency
+    claimed_level: empirical
+    concepts: [feedback, saturation-antiwindup]
+    lesson: >-
+      A CONTROL LOOP BECAME AN INFORMATION LEAK. Throttled frequency inversely correlates
+      with pre-throttle power, so the loop's response leaks data-dependent behaviour. Every
+      feedback path is also a side channel — including an AI system's latency.
+    verified: true
+
+  # ---- markets --------------------------------------------------------------------
+  - id: circuit-breakers
+    name: Market-wide circuit breakers and limit-up limit-down bands
+    domain: markets
+    controlled_variable: Index decline against prior close; per-stock price against a trailing band
+    controller: Bang-bang halts at fixed thresholds
+    claimed_level: certified
+    concepts: [feedback, dead-time, saturation-antiwindup]
+    lesson: >-
+      The thresholds ARE the post-mortem. The old levels never fired during the crash they
+      existed to stop, which is why they were lowered and a per-stock band was added.
+      Certified here means rule-mandated and deterministic — nobody claims it stabilizes prices.
+    verified: true
+
+  - id: flash-crash-algo
+    name: The volume-participation execution algorithm of the 2010 flash crash
+    domain: markets
+    controlled_variable: Execution participation rate, set as a share of trailing traded volume
+    controller: Volume-participation execution, without regard to price or time
+    claimed_level: anecdote
+    concepts: [feedback, goodhart]
+    lesson: >-
+      POSITIVE FEEDBACK WITH NO EXTERNAL REFERENCE. The algorithm's own fills inflated the
+      volume that set its rate. If a system's throughput is governed by a number it itself
+      inflates, you have a runaway loop — bound it with a reference the agent cannot move.
+    verified: true
+
+  - id: taylor-rule
+    name: The Taylor rule as a policy benchmark
+    domain: markets
+    controlled_variable: The nominal policy interest rate
+    controller: Proportional feedback on an inflation gap and an output gap
+    claimed_level: empirical
+    concepts: [feedback, internal-model-principle]
+    lesson: >-
+      The deliberately weak guarantee IS the story: the most consequential feedback law in
+      macroeconomics is explicitly advisory, consulted alongside other information rather
+      than applied mechanically. Sometimes the right authority for a controller is "suggest".
+    verified: true
+
+  - id: repricing-bots
+    name: Coupled algorithmic repricing
+    domain: markets
+    controlled_variable: Own listing price, set as a fixed multiple of a rival's listing price
+    controller: Two coupled proportional loops
+    claimed_level: anecdote
+    concepts: [small-gain, feedback]
+    lesson: >-
+      Two proportional loops whose GAINS MULTIPLIED TO MORE THAN ONE drove a book's price
+      into the tens of millions. The small-gain theorem, demonstrated commercially. Neither
+      bot could see the loop it was in — each was locally rational.
+    verified: true
+
+  # ---- climate and bio ------------------------------------------------------------
+  - id: bioreactor
+    name: Fed-batch bioreactor probing control at production scale
+    domain: medicine
+    controlled_variable: Glucose feed rate, inferred from the dissolved-oxygen response to deliberate feed pulses
+    controller: Probing feedback — pulse-response feedback on the feed pump
+    claimed_level: empirical
+    concepts: [persistence-excitation, sysid, feedback]
+    lesson: >-
+      The loop that works at lab scale DEGRADES IN THE REAL VESSEL on industrial medium.
+      Also a lovely example of deliberate excitation: the controller pokes the plant on
+      purpose, because without excitation you cannot estimate.
+    verified: true
+
+  - id: building-mpc
+    name: Model predictive control of a fully occupied office building
+    domain: energy
+    controlled_variable: Thermal comfort via heating, cooling, ventilation and blinds, using weather forecasts
+    controller: Model predictive control against a rule-based baseline
+    claimed_level: empirical
+    concepts: [mpc, sysid]
+    lesson: >-
+      An ECONOMIC failure, not a control failure — the controller worked, and the required
+      initial investment was too high to justify on operating savings alone. Also honest
+      about its own evidence: the energy-saving figure came from simulation, not a measured
+      comparison on the building.
+    verified: true
+
+  - id: sai-feedback
+    name: Stratospheric aerosol injection as a feedback problem (simulation only)
+    domain: energy
+    controlled_variable: Three temperature targets held simultaneously against a warming scenario
+    controller: Feedback adjusting injection rate independently at four latitudes, updated yearly
+    claimed_level: empirical
+    concepts: [feedback, waterbed, internal-model-principle]
+    lesson: >-
+      CONTROL SUCCEEDS ON THE CHOSEN METRICS AND FAILS ON THE UNCHOSEN ONES — annual-mean
+      targets produce seasonal over- and under-cooling and suppress the hydrological cycle.
+      This is the waterbed effect on a planetary scale, and the sharpest available warning
+      about optimizing an AI system against the metrics you happened to write down.
+    verified: true

@@ -1,0 +1,246 @@
+# LoopCards — the same six organs, twelve costumes.
+#
+# This file is the repo's Rosetta stone. A thermostat, a humanoid, and an LLM agent differ
+# in WHAT FILLS each slot, never in WHICH SLOTS EXIST. That invariance is what lets a
+# result proved about one loop transfer to another.
+#
+# Three fields beyond the six organs, because they are where real systems actually fail:
+#   latency   — every loop has delay, and delay is what turns a stable controller unstable
+#   authority — what the controller is ALLOWED to do (the 737 MAX accident is one sentence
+#               about authority the designers did not model)
+#   fallback  — what happens when the loop fails. "Nothing" is a valid and damning answer.
+#
+# A domain without a complete card here fails tools/check.py. That is the stopping rule.
+
+loops:
+  - id: thermostat
+    system: A household thermostat (the reference loop — every other card is this in costume)
+    domain: energy
+    organs:
+      reference: The temperature you dial in, e.g. 72°F
+      comparator: Subtraction — dialled temperature minus measured temperature
+      controller: A bang-bang rule with hysteresis (on below 70, off above 74)
+      actuator: The furnace relay
+      plant: The room, its walls, and the weather outside
+      sensor: The thermometer, sampled every few seconds
+    latency: Seconds to sense, minutes for the room to respond — the slow plant is why bang-bang suffices
+    authority: Binary — the furnace is on or off. It cannot cool, and it cannot exceed its rated output.
+    fallback: A thermal cutoff trips if the plenum overheats, independent of the controller
+    notes: >-
+      Included deliberately as the anchor. Every claim in this repo is checked against the
+      question "would this sentence be obviously true or obviously silly about a thermostat?"
+
+  - id: rlhf
+    system: Reinforcement learning from human feedback (InstructGPT-style)
+    domain: alignment
+    organs:
+      reference: Human preference, expressed as pairwise comparisons between two responses
+      comparator: The reward-model score of a sampled response, minus a KL penalty against the reference policy
+      controller: The policy-gradient optimizer (PPO), with a clipped trust region on each update
+      actuator: The gradient update applied to the policy weights
+      plant: The language model's policy — the distribution over responses
+      sensor: The learned reward model, standing in for the human rater
+    latency: Hours to days per policy iteration; the human-label loop is weeks
+    authority: >-
+      Unbounded in principle over the weights, bounded in practice by the KL penalty and the
+      clip. The KL coefficient beta IS the authority limit, and it is usually set by feel.
+    fallback: >-
+      Revert to the reference (pre-RL) checkpoint. This is a real and commonly used fallback,
+      which is more than most AI loops have.
+    notes: >-
+      The classic instrument problem: the sensor (reward model) is trained on the same
+      distribution the plant is about to leave. Goodhart is not a surprise here — it is the
+      predicted behaviour of a loop whose sensor stops being valid off-distribution.
+
+  - id: agent-loop
+    system: A tool-using LLM agent (ReAct-style act/observe cycle)
+    domain: agentic
+    organs:
+      reference: The user's goal, stated once in natural language and never restated
+      comparator: The model's own judgement of whether it is done — usually no explicit error signal at all
+      controller: The model's next-token policy, conditioned on the accumulated context
+      actuator: The emitted tool call (shell command, API request, file write)
+      plant: The external world — filesystem, network, the user, other services
+      sensor: Tool return values and error messages, fed back into the context
+    latency: Seconds per step; tens of steps per task; no bound on total horizon
+    authority: >-
+      Whatever the tool permissions allow. This is the least-analysed authority limit in
+      modern computing, and usually the widest.
+    fallback: >-
+      Typically none. Some harnesses add a step budget, a human confirmation gate, or a
+      sandbox — but "the loop runs until it stops" is still the common case.
+    notes: >-
+      Compare against the thermostat: the reference is never re-read, the comparator is the
+      plant judging itself, and there is no fallback. A thermostat built this way would burn
+      the house down, and it is exactly the structure most agent frameworks ship.
+
+  - id: diffusion-sampling
+    system: Guided diffusion sampling (classifier-free guidance)
+    domain: genai
+    organs:
+      reference: The conditioning signal — a text prompt, a class label, a depth map
+      comparator: The difference between the conditional and unconditional noise predictions
+      controller: The guided update rule, with guidance scale w as the gain
+      actuator: The denoising step applied to the latent
+      plant: The latent state evolving under the reverse-time stochastic differential equation
+      sensor: The network's own score estimate at the current noise level
+    latency: Milliseconds per step, 20 to 1000 steps per sample
+    authority: >-
+      The guidance scale is unbounded in the code and bounded by taste in practice.
+      High w produces saturation artefacts — the visual signature of too much gain.
+    fallback: Set w = 1 (plain conditional sampling), which always produces a valid sample
+    notes: >-
+      One of the few AI loops where the control mapping is a theorem rather than a metaphor:
+      the reverse SDE is literally the controlled process and the score is literally the control.
+
+  - id: legged-locomotion
+    system: A learned locomotion policy on a quadruped (legged_gym-style, deployed sim-to-real)
+    domain: physical-ai
+    organs:
+      reference: Commanded body velocity — forward, lateral, and yaw rate
+      comparator: Tracking error between commanded and estimated base velocity, inside the reward
+      controller: The policy network, running at 50 Hz, emitting joint position targets
+      actuator: Joint PD controllers at 1 kHz converting targets to motor torques
+      plant: The robot's rigid-body dynamics plus ground contact
+      sensor: Joint encoders, inertial measurement unit, and an estimated base state
+    latency: 20 ms policy step, 1 ms torque loop, plus 5-15 ms of sensing and communication delay
+    authority: Torque limits per joint, enforced in firmware below the policy — a real hard limit
+    fallback: A damping/sit controller triggered on inertial-measurement anomaly or watchdog timeout
+    notes: >-
+      A genuine two-rate cascade: a slow learned outer loop wrapped around a fast classical
+      inner loop. The inner PD loop is doing more stabilizing work than most papers credit.
+
+  - id: whole-body-mpc
+    system: Whole-body model predictive control on a humanoid or quadruped
+    domain: robotics
+    organs:
+      reference: A desired centre-of-mass trajectory and footstep plan
+      comparator: Predicted-versus-desired state deviation, summed over the prediction horizon
+      controller: An online optimization re-solved every control step over a receding horizon
+      actuator: Joint torques, or ground reaction forces mapped to torques
+      plant: Centroidal or full rigid-body dynamics with contact constraints
+      sensor: State estimator fusing inertial measurement, joint encoders, and contact detection
+    latency: 2-20 ms per solve; the solve time IS the control period, and it varies with problem difficulty
+    authority: Friction cone, joint torque, and kinematic limits, encoded as explicit constraints
+    fallback: Last feasible solution is re-applied; repeated infeasibility triggers a safe stop
+    notes: >-
+      The honest weak point is the solve-time variance. A controller whose period depends on
+      the difficulty of the problem it is solving is a controller with a variable delay, and
+      variable delay is the hardest kind to have a margin against.
+
+  - id: world-model-planning
+    system: Planning inside a learned world model (Dreamer / TD-MPC-style)
+    domain: world-models
+    organs:
+      reference: The reward function, or a goal latent state
+      comparator: Predicted return from imagined rollouts, compared across candidate action sequences
+      controller: Trajectory optimization or a policy trained inside the imagined rollouts
+      actuator: The first action of the chosen sequence, applied to the real environment
+      plant: The real environment; the learned model is a stand-in for it during planning
+      sensor: Observations encoded into the model's latent state
+    latency: Planning happens in imagination (fast); the real loop closes once per environment step
+    authority: The action space of the environment; planning horizon bounds how far a mistake propagates
+    fallback: Shorten the horizon, or fall back to the model-free policy when model error is high
+    notes: >-
+      This is MPC with a learned plant model, which is the pairing classical MPC always wanted.
+      The load-bearing assumption is that model error stays small over the planning horizon —
+      and that assumption is almost never discharged, only hoped for.
+
+  - id: av-stack
+    system: An autonomous driving stack (perception, prediction, planning, tracking)
+    domain: driving
+    organs:
+      reference: The route, plus rules of the road and a comfort profile
+      comparator: Deviation from the planned trajectory, and predicted collision risk
+      controller: A behaviour planner over a trajectory optimizer, with a low-level path tracker
+      actuator: Steering, throttle, and brake commands
+      plant: The vehicle's dynamics plus the surrounding traffic — which reacts to you
+      sensor: Cameras, lidar, radar, and the perception stack that turns them into objects
+    latency: 100-300 ms perception-to-actuation, against sub-second time-to-collision budgets
+    authority: >-
+      Steering rate and deceleration limits; an independent safety layer can command a
+      minimal-risk manoeuvre regardless of what the planner wants
+    fallback: Minimal-risk condition — controlled stop in lane or on the shoulder
+    notes: >-
+      The plant includes other drivers, who change their behaviour in response to yours.
+      A plant that reads your controller is not a plant any classical theorem covers.
+
+  - id: llm-serving
+    system: An LLM inference server under a latency service-level objective
+    domain: infra
+    organs:
+      reference: The target p95 time-to-first-token and inter-token latency
+      comparator: Measured latency and queue depth against the target
+      controller: The scheduler — batch composition, chunked prefill, admission control, autoscaling
+      actuator: Batch size, replica count, GPU clock, and requests admitted or shed
+      plant: The GPU fleet, its memory, and the arriving request stream
+      sensor: Per-request latency telemetry, queue depth, and key-value cache occupancy
+    latency: Milliseconds for the batch loop, tens of seconds for autoscaling to add capacity
+    authority: Maximum replica count and the budget; the scheduler may shed load but not refuse everything
+    fallback: Load shedding with a 503, and a degraded-quality smaller model
+    notes: >-
+      Textbook control with an unusual honesty problem: the autoscaling loop is slow, the
+      arrival process is bursty, and retries create positive feedback. Retry storms are a
+      control instability with a well-known fix (jitter plus circuit breaking) that is
+      rediscovered by every generation of engineers.
+
+  - id: artificial-pancreas
+    system: A closed-loop insulin delivery system (artificial pancreas)
+    domain: medicine
+    organs:
+      reference: Target blood glucose, typically around 110 mg/dL
+      comparator: Measured glucose minus target, plus predicted trajectory
+      controller: Model predictive control or a PID variant with insulin-on-board constraints
+      actuator: The insulin pump's basal rate and correction boluses
+      plant: Human glucose-insulin metabolism, with meals and exercise as disturbances
+      sensor: Continuous glucose monitor, sampling every 5 minutes with a 10-15 minute physiological lag
+    latency: >-
+      15-20 minutes of sensor lag plus 60-90 minutes for subcutaneous insulin to peak.
+      The delay dominates the design and is the reason the loop cannot be aggressive.
+    authority: >-
+      Hard caps on maximum insulin delivery, because the failure is asymmetric: too little
+      insulin is slow harm, too much is acute and can be fatal
+    fallback: Suspend delivery on predicted low glucose; revert to open-loop manual dosing; patient alerts
+    notes: >-
+      The clearest teaching example of asymmetric risk. The controller is deliberately
+      detuned — worse tracking, bought on purpose — because one direction of error kills faster.
+
+  - id: fly-by-wire
+    system: A commercial fly-by-wire flight control system with envelope protection
+    domain: aerospace
+    organs:
+      reference: Pilot sidestick or autopilot command, interpreted as a desired load factor or attitude
+      comparator: Commanded versus measured state, evaluated against envelope limits
+      controller: Redundant flight control computers running certified control laws
+      actuator: Hydraulic or electric actuators driving the control surfaces
+      plant: The airframe's aerodynamics across the flight envelope
+      sensor: Air data, inertial reference, and angle-of-attack sensors — voted across redundant channels
+    latency: Single-digit milliseconds, with certified worst-case execution time
+    authority: >-
+      Envelope protection bounds what the pilot can command. Where authority exceeds what
+      the pilot can override, the design must justify it — and that justification is exactly
+      what accident investigations examine.
+    fallback: >-
+      Graded degradation through alternate and direct law, ending in mechanical or
+      independent backup, with the crew as the final controller
+    notes: >-
+      The only domain here where a regulator reads your assumption ledger before you ship.
+      DO-178C and ARP4754A are, structurally, a mandated version of this repo's gate.
+
+  - id: market-loop
+    system: An electronic market with algorithmic participants and circuit breakers
+    domain: markets
+    organs:
+      reference: No single setpoint — each participant has its own objective, and the exchange targets orderly trading
+      comparator: Price deviation from a reference band, and volatility against thresholds
+      controller: Exchange rules — circuit breakers, limit-up/limit-down bands, auction restarts
+      actuator: Halting trading, widening bands, or forcing an auction
+      plant: The order book and the strategic participants trading in it
+      sensor: Real-time price, volume, and volatility feeds
+    latency: Microseconds for participants, seconds to minutes for the exchange's supervisory action
+    authority: The exchange may halt a security or the whole market — very high authority, rarely used
+    fallback: Trading halt; in extremity, cancelling trades after the fact
+    notes: >-
+      The reference is genuinely absent, which makes this the hardest card to fill honestly.
+      Participants optimize against each other, so the plant is a game, not a dynamical
+      system — and control theory's standard results do not directly apply.

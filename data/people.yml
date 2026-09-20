@@ -1,0 +1,722 @@
+# Key contributors.
+#
+# `owns` is the ONE concept most associated with this person. Deliberately singular:
+# a person who "owns" six things owns none, and the discipline of picking one is what
+# makes this list navigable rather than encyclopaedic.
+#
+# `verified` is false where a primary source was not resolved in the research pass. Two
+# rows below carry contested death dates and are marked unverified rather than asserted —
+# these are real people and the repo publishes its unverified_rate rather than guessing.
+#
+# `advised_by` builds the doctoral lineage edges in the knowledge graph.
+
+people:
+  # ---- classical ------------------------------------------------------------------
+  - id: maxwell
+    name: James Clerk Maxwell
+    years: 1831–1879
+    contribution: First mathematical stability analysis of a feedback machine — the steam-engine governor.
+    owns: governor stability
+    owns_concept: feedback
+    era: classical
+    verified: true
+
+  - id: lyapunov
+    name: Aleksandr M. Lyapunov
+    years: 1857–1918
+    contribution: Proved stability of motion without ever solving the equations of motion.
+    owns: Lyapunov function
+    owns_concept: lyapunov-function
+    era: classical
+    verified: true
+
+  - id: nyquist
+    name: Harry Nyquist
+    years: 1889–1976
+    contribution: Turned "will this feedback loop howl?" into a picture you can read off a plot.
+    owns: Nyquist criterion
+    owns_concept: margins
+    era: classical
+    verified: true
+
+  - id: black
+    name: Harold S. Black
+    years: 1898–1983
+    contribution: Invented the negative-feedback amplifier in 1927, trading gain for accuracy.
+    owns: negative feedback
+    owns_concept: feedback
+    era: classical
+    verified: true
+
+  - id: bode
+    name: Hendrik W. Bode
+    years: 1905–1982
+    contribution: Gain and phase plots, plus the proof that feedback benefit is conserved, not free.
+    owns: sensitivity integral
+    owns_concept: waterbed
+    era: classical
+    verified: true
+
+  - id: wiener
+    name: Norbert Wiener
+    years: 1894–1964
+    contribution: Framed control, communication, and biology as one feedback science.
+    owns: cybernetics
+    owns_concept: feedback
+    era: classical
+    verified: true
+
+  - id: nichols
+    name: Nathaniel B. Nichols
+    years: 1914–1997
+    contribution: Co-authored the tuning rules still used on most industrial loops, and the gain-phase chart.
+    owns: Nichols chart
+    owns_concept: margins
+    era: classical
+    verified: true
+
+  - id: ziegler
+    name: John G. Ziegler
+    years: ""
+    contribution: Co-authored the step and oscillation recipes that tune most industrial three-term controllers.
+    owns: Ziegler–Nichols tuning
+    owns_concept: feedback
+    era: classical
+    verified: false
+
+  # ---- modern / state-space -------------------------------------------------------
+  - id: bellman
+    name: Richard E. Bellman
+    years: 1920–1984
+    contribution: Showed an optimal long plan is built out of optimal short ones.
+    owns: principle of optimality
+    owns_concept: dynamic-programming
+    era: modern
+    verified: true
+
+  - id: pontryagin
+    name: Lev S. Pontryagin
+    years: 1908–1988
+    contribution: Necessary conditions for optimal control when the actuator has hard limits.
+    owns: maximum principle
+    owns_concept: maximum-principle
+    era: modern
+    verified: true
+
+  - id: kalman
+    name: Rudolf E. Kálmán
+    years: 1930–2016
+    contribution: Recursive optimal estimator, and put control on a state-space footing.
+    owns: Kalman filter
+    owns_concept: kalman-filter
+    era: modern
+    verified: true
+
+  - id: luenberger
+    name: David G. Luenberger
+    years: b. 1937
+    contribution: Built a running copy of the plant, corrected by the measurement error.
+    owns: observer
+    owns_concept: observer
+    era: modern
+    verified: false
+    note: A death date of 2026 was reported in the research pass but not confirmed against a primary source.
+
+  - id: willems
+    name: Jan C. Willems
+    years: 1939–2013
+    contribution: Energy bookkeeping — storage versus supply — as the basis of stability.
+    owns: dissipativity
+    owns_concept: passivity
+    era: modern
+    verified: true
+
+  - id: wonham
+    name: W. Murray Wonham
+    years: 1934–2023
+    contribution: Proved a regulator must embed a model of whatever it is required to reject.
+    owns: internal model principle
+    owns_concept: internal-model-principle
+    era: modern
+    verified: true
+
+  - id: astrom
+    name: Karl Johan Åström
+    years: b. 1934
+    contribution: Controllers that identify the plant online and retune themselves.
+    owns: self-tuning regulator
+    owns_concept: robust-vs-adaptive
+    era: adaptive
+    verified: true
+
+  - id: horowitz
+    name: Isaac Horowitz
+    years: 1920–2005
+    contribution: Made plant uncertainty an explicit design input rather than an afterthought.
+    owns: quantitative feedback theory
+    owns_concept: mu-synthesis
+    era: robust
+    verified: true
+
+  # ---- robust ---------------------------------------------------------------------
+  - id: zames
+    name: George Zames
+    years: 1934–1997
+    contribution: Loop-gain stability, then worst-case disturbance design posed as an optimization.
+    owns: H-infinity
+    owns_concept: h-infinity
+    era: robust
+    verified: true
+
+  - id: doyle
+    name: John C. Doyle
+    years: b. 1954
+    contribution: >-
+      Killed the myth that optimal estimation plus optimal control is automatically safe,
+      then built the theory of hard tradeoffs that any layered system obeys.
+    owns: structured singular value
+    owns_concept: mu-synthesis
+    era: robust
+    labs: [caltech-cds]
+    verified: true
+
+  - id: utkin
+    name: Vadim I. Utkin
+    years: 1937–2022
+    contribution: Deliberate high-speed switching that makes the plant follow a chosen surface.
+    owns: sliding mode control
+    owns_concept: sliding-mode
+    era: robust
+    verified: true
+
+  - id: tomlin
+    name: Claire J. Tomlin
+    years: b. 1969
+    contribution: Computes the exact set of states from which a system can still be saved.
+    owns: reachability analysis
+    owns_concept: reachability
+    era: robust
+    labs: [berkeley-eecs]
+    verified: true
+
+  # ---- nonlinear / adaptive -------------------------------------------------------
+  - id: isidori
+    name: Alberto Isidori
+    years: b. 1942
+    contribution: Differential geometry that turns nonlinear plants into linear-looking ones.
+    owns: feedback linearization
+    owns_concept: backstepping
+    era: modern
+    verified: true
+
+  - id: khalil
+    name: Hassan K. Khalil
+    years: b. 1950
+    contribution: The canonical nonlinear stability treatment, and high-gain output-feedback observers.
+    owns: nonlinear stability analysis
+    owns_concept: lyapunov-function
+    era: modern
+    verified: true
+
+  - id: sontag
+    name: Eduardo D. Sontag
+    years: b. 1951
+    contribution: Defined precisely what "a disturbance does not blow it up" means.
+    owns: input-to-state stability
+    owns_concept: iss
+    era: modern
+    verified: true
+
+  - id: slotine
+    name: Jean-Jacques Slotine
+    years: ""
+    contribution: Sliding-mode and adaptive robot control; contraction as a stability metric.
+    owns: contraction analysis
+    owns_concept: sliding-mode
+    era: modern
+    labs: [mit-csail]
+    verified: false
+
+  - id: krstic
+    name: Miroslav Krstić
+    years: b. 1964
+    contribution: Recursive design, with Kanellakopoulos and Kokotović, for unknown nonlinear plants.
+    owns: adaptive backstepping
+    owns_concept: backstepping
+    era: adaptive
+    verified: true
+
+  # ---- predictive / optimization --------------------------------------------------
+  - id: morari
+    name: Manfred Morari
+    years: b. 1951
+    contribution: Put a plant model inside the controller, and industrialized predictive control.
+    owns: internal model control
+    owns_concept: internal-model-principle
+    era: modern
+    verified: true
+
+  - id: mayne
+    name: David Q. Mayne
+    years: 1930–2024
+    contribution: Gave predictive control its stability proof, then a disturbance-proof version.
+    owns: tube MPC
+    owns_concept: tube-mpc
+    era: robust
+    verified: true
+
+  - id: rawlings
+    name: James B. Rawlings
+    years: b. 1957
+    contribution: Predictive control and its estimation twin, made rigorous and teachable.
+    owns: moving-horizon estimation
+    owns_concept: mpc
+    era: modern
+    verified: true
+
+  - id: boyd
+    name: Stephen P. Boyd
+    years: b. 1958
+    contribution: Recast control design as convex problems a solver can always solve.
+    owns: convex optimization
+    owns_concept: mpc
+    era: modern
+    labs: [stanford]
+    verified: true
+
+  - id: bertsekas
+    name: Dimitri P. Bertsekas
+    years: b. 1942
+    contribution: Bridged dynamic programming and neural approximation.
+    owns: approximate dynamic programming
+    owns_concept: dynamic-programming
+    era: learning
+    labs: [mit-lids]
+    verified: false
+    note: A death date of 2026 was reported in the research pass but not confirmed against a primary source.
+
+  # ---- learning-era bridges -------------------------------------------------------
+  - id: ames
+    name: Aaron D. Ames
+    years: ""
+    contribution: A runtime safety filter that minimally edits whatever action was commanded.
+    owns: control barrier function
+    owns_concept: cbf
+    era: learning
+    labs: [caltech-amber]
+    verified: true
+
+  - id: tedrake
+    name: Russ Tedrake
+    years: ""
+    contribution: Verified feedback motion planning for underactuated robots; now verification of learned policies.
+    owns: LQR-Trees
+    owns_concept: lyapunov-function
+    era: learning
+    labs: [mit-csail]
+    verified: false
+
+  - id: todorov
+    name: Emanuel Todorov
+    years: b. 1971
+    contribution: Iterative local optimal control, plus the simulator that trained a generation of policies.
+    owns: iterative LQG
+    owns_concept: lqr
+    era: learning
+    verified: true
+
+  - id: murray
+    name: Richard M. Murray
+    years: b. 1963
+    contribution: Control over networks, and the modern feedback-systems curriculum.
+    owns: networked control
+    owns_concept: feedback
+    era: modern
+    labs: [caltech-cds]
+    verified: true
+
+  - id: sutton
+    name: Richard S. Sutton
+    years: b. 1957
+    contribution: Learning to predict long-run return from one-step surprise.
+    owns: temporal-difference learning
+    owns_concept: dynamic-programming
+    era: learning
+    verified: true
+
+  - id: barto
+    name: Andrew G. Barto
+    years: b. 1948
+    contribution: Reinforcement learning as adaptive optimal control; separated the critic from the actor.
+    owns: actor–critic
+    owns_concept: dynamic-programming
+    era: learning
+    verified: true
+
+  - id: recht
+    name: Benjamin Recht
+    years: ""
+    contribution: Measured learning-based control against classical baselines, honestly and uncomfortably.
+    owns: continuous-control RL
+    owns_concept: lqr
+    era: learning
+    labs: [berkeley-eecs]
+    verified: true
+
+  - id: levine
+    name: Sergey Levine
+    years: ""
+    contribution: Used trajectory optimization to supervise neural policies end to end.
+    owns: guided policy search
+    owns_concept: lqr
+    era: learning
+    labs: [berkeley-bair]
+    verified: true
+
+  - id: matni
+    name: Nikolai Matni
+    years: ""
+    contribution: Sample-complexity and robustness guarantees for learned controllers.
+    owns: system level synthesis
+    owns_concept: robust-vs-adaptive
+    era: learning
+    labs: [penn-grasp]
+    verified: true
+
+  - id: dean
+    name: Sarah Dean
+    years: ""
+    contribution: Dynamics of data-driven decision systems, including recommender feedback loops.
+    owns: performative feedback
+    owns_concept: sysid
+    era: learning
+    verified: true
+
+  - id: kolter
+    name: Zico Kolter
+    years: ""
+    contribution: Certified robustness, optimization layers inside networks, and adversarial analysis of language models.
+    owns: certified robustness
+    owns_concept: safety-filter
+    era: learning
+    verified: true
+
+  - id: kwiatkowska
+    name: Marta Kwiatkowska
+    years: ""
+    contribution: Extended formal, quantitative verification to systems with neural components.
+    owns: probabilistic model checking
+    owns_concept: reachability
+    era: learning
+    verified: true
+
+  - id: schulman
+    name: John Schulman
+    years: ""
+    contribution: >-
+      Made policy optimization stable enough to deploy — a trust region, then a clip cheap
+      enough that it became the default optimizer of the alignment era.
+    owns: proximal policy optimization
+    owns_concept: trust-region
+    era: learning
+    verified: true
+
+  - id: christiano
+    name: Paul Christiano
+    years: ""
+    contribution: Learned the objective from human comparisons rather than specifying it.
+    owns: reinforcement learning from human preferences
+    owns_concept: preference-setpoint
+    era: learning
+    verified: true
+
+  # =====================================================================================
+  # The rigorous math bridge — stochastic optimal control ↔ generative modelling
+  #
+  # This cluster matters more than its size suggests. Everywhere else in this repo the
+  # control-to-AI mapping is tagged `analogy`; here it is a theorem. Diffusion sampling IS
+  # stochastic optimal control, flow matching IS a transport equation, and RLHF's policy
+  # gradient HAS a convergence proof in continuous time. These are the people who proved it.
+  # =====================================================================================
+
+  - id: mo-zhou
+    name: Mo Zhou (周默)
+    years: ""
+    contribution: >-
+      Proved that policy gradient — the method underneath RLHF — actually converges globally
+      on continuous-time stochastic optimal control, and built score-based solvers for
+      mean-field control problems.
+    owns: policy gradient for stochastic optimal control
+    owns_concept: pg-global-convergence
+    era: learning
+    labs: [pku-math, ucla-math, duke-math]
+    advised_by: [jianfeng-lu]
+    homepage: https://mozhou1995.github.io/
+    verified: true
+    note: >-
+      B.S. Mathematics, Tsinghua 2018. Ph.D. Mathematics, Duke 2023 under Jianfeng Lu.
+      UCLA 2023-2026 under Stanley Osher, promoted to Assistant Adjunct Professor in
+      August 2025. Joined Peking University School of Mathematical Sciences, Department of
+      Information and Computational Science, as Assistant Professor in September 2026.
+      UCLA IDRE Fellow, September 2024. Recruiting postdocs, PhD and MS students; welcomes
+      undergraduate researchers. His homepage tagline is literally "Mathematics · Control ·
+      Learning", which is this repo's thesis stated as a job description.
+
+  - id: osher
+    name: Stanley Osher
+    years: ""
+    contribution: >-
+      Track a moving shape by tracking a water level on an invisible landscape instead of
+      the shape itself — and four decades later, the same PDE machinery became the
+      numerical engine of generative modelling.
+    owns: level-set methods
+    owns_concept: dynamic-programming
+    era: modern
+    labs: [ucla-math]
+    homepage: https://www.math.ucla.edu/~sjo/
+    verified: true
+    note: >-
+      Carl Friedrich Gauss Prize 2014 (ICM Seoul, "for applications of mathematics").
+      Four landmark lines: level-set methods with Sethian (1988), ENO/WENO schemes with
+      Harten, Engquist and Chakravarthy, total-variation denoising with Rudin and Fatemi
+      (1992), and Bregman iteration (2005).
+
+  - id: jianfeng-lu
+    name: Jianfeng Lu
+    years: ""
+    contribution: >-
+      Proves how deep and how wide a network must be to approximate a function or a
+      high-dimensional PDE solution — the theory that says whether a method can work at all.
+    owns: deep network approximation theory
+    owns_concept: deep-bsde
+    era: learning
+    labs: [duke-math]
+    homepage: https://sites.math.duke.edu/~jianfeng/
+    verified: true
+
+  - id: wuchen-li
+    name: Wuchen Li
+    years: ""
+    contribution: >-
+      Treats learning as moving a pile of probability the cheapest way, with optimal
+      transport supplying the ruler that gradient descent measures distance against.
+    owns: transport information geometry
+    owns_concept: optimal-transport
+    era: learning
+    verified: true
+
+  - id: ruthotto
+    name: Lars Ruthotto
+    years: ""
+    contribution: >-
+      Reads a neural network as a differential equation you steer, so training becomes an
+      optimal-control problem a numerical analyst can solve.
+    owns: deep learning as optimal control
+    owns_concept: neural-ode
+    era: learning
+    labs: [emory-math]
+    homepage: https://math.emory.edu/~lruthot/
+    verified: true
+
+  - id: nurbekyan
+    name: Levon Nurbekyan
+    years: ""
+    contribution: Made crowd-of-agents equilibria computable in high dimensions by letting a network carry the value function.
+    owns: computational mean-field games
+    owns_concept: mean-field-games
+    era: learning
+    labs: [emory-math]
+    verified: true
+
+  - id: weinan-e
+    name: Weinan E
+    years: ""
+    contribution: >-
+      Showed a neural network can solve partial differential equations in hundreds of
+      dimensions by rewriting them as a stochastic control problem.
+    owns: deep BSDE method
+    owns_concept: deep-bsde
+    era: learning
+    labs: [pku-math]
+    verified: true
+
+  - id: jiequn-han
+    name: Jiequn Han
+    years: ""
+    contribution: >-
+      Built the deep backward-stochastic-differential-equation solver, in which the network
+      learns the CONTROL — the gradient of the solution — and the equation solves itself.
+    owns: deep BSDE solver
+    owns_concept: deep-bsde
+    era: learning
+    verified: true
+
+  - id: lions
+    name: Pierre-Louis Lions
+    years: ""
+    contribution: >-
+      Co-invented mean-field games: when a million players each react to the average of
+      everyone else, two coupled equations describe the whole crowd.
+    owns: mean-field games
+    owns_concept: mean-field-games
+    era: modern
+    verified: true
+    note: Fields Medal 1994. Collège de France, chair in Partial Differential Equations and Applications.
+
+  - id: carmona
+    name: René Carmona
+    years: ""
+    contribution: Rebuilt mean-field games on probability rather than PDEs, which is what made them simulable.
+    owns: probabilistic mean-field games
+    owns_concept: mean-field-games
+    era: modern
+    labs: [princeton-orfe]
+    verified: true
+
+  - id: caines
+    name: Peter E. Caines
+    years: ""
+    contribution: >-
+      Independently founded mean-field games from the engineering side: each agent needs
+      only the population average, not everyone else's state.
+    owns: Nash certainty equivalence
+    owns_concept: mean-field-games
+    era: modern
+    verified: true
+
+  - id: brenier
+    name: Yann Brenier
+    years: ""
+    contribution: >-
+      Proved the cheapest way to move one distribution onto another is the gradient of a
+      convex function — the theorem every transport-based generative model rests on.
+    owns: Brenier's theorem
+    owns_concept: optimal-transport
+    era: modern
+    verified: true
+
+  - id: benamou
+    name: Jean-David Benamou
+    years: ""
+    contribution: >-
+      Showed that optimal transport is a fluid-flow problem: the cheapest rearrangement is
+      the laziest flow that carries the mass in one unit of time.
+    owns: dynamic optimal transport
+    owns_concept: optimal-transport
+    era: modern
+    verified: true
+
+  - id: peyre
+    name: Gabriel Peyré
+    years: ""
+    contribution: Made optimal transport something you can actually compute and differentiate through.
+    owns: computational optimal transport
+    owns_concept: optimal-transport
+    era: learning
+    verified: true
+
+  - id: cuturi
+    name: Marco Cuturi
+    years: ""
+    contribution: >-
+      Added a pinch of entropy, and an impossible transport problem collapsed into a few
+      rounds of row and column rescaling — thousands of times faster.
+    owns: Sinkhorn distances
+    owns_concept: optimal-transport
+    era: learning
+    verified: true
+
+  - id: yang-song
+    name: Yang Song
+    years: ""
+    contribution: >-
+      Recast image generation as running a noise-adding differential equation backwards in
+      time — the continuous-time core of every modern diffusion model.
+    owns: score-based generative modelling
+    owns_concept: reverse-sde
+    era: learning
+    verified: true
+
+  - id: ermon
+    name: Stefano Ermon
+    years: ""
+    contribution: Score matching as the training signal — learn where the data density points, then follow it.
+    owns: denoising score matching
+    owns_concept: reverse-sde
+    era: learning
+    verified: true
+
+  - id: rtq-chen
+    name: Ricky T. Q. Chen
+    years: ""
+    contribution: >-
+      Replaced a stack of layers with one continuously-flowing differential equation solved
+      by a numerical integrator. The gradient method is Pontryagin's costate equation.
+    owns: neural ordinary differential equations
+    owns_concept: neural-ode
+    era: learning
+    verified: true
+
+  - id: lipman
+    name: Yaron Lipman
+    years: ""
+    contribution: >-
+      Flow matching: rather than simulating anything, train the network to point along the
+      path from noise to data, and regress on the arrow.
+    owns: flow matching
+    owns_concept: flow-matching
+    era: learning
+    verified: true
+
+  - id: fazel
+    name: Maryam Fazel
+    years: ""
+    contribution: >-
+      Proved policy gradient converges to the true optimum on the linear quadratic
+      regulator, despite the objective not being convex.
+    owns: global convergence of policy gradient for LQR
+    owns_concept: pg-global-convergence
+    era: learning
+    verified: true
+
+  - id: kakade
+    name: Sham Kakade
+    years: ""
+    contribution: >-
+      Natural policy gradient — take the step that is smallest in BEHAVIOUR change rather
+      than parameter change. The direct ancestor of the trust region in PPO and RLHF.
+    owns: natural policy gradient
+    owns_concept: trust-region
+    era: learning
+    verified: true
+
+  - id: theodorou
+    name: Evangelos Theodorou
+    years: ""
+    contribution: >-
+      Turned path-integral control into a real-time controller: roll out thousands of noisy
+      futures on a GPU, average them, and steer.
+    owns: model predictive path integral control
+    owns_concept: path-integral-control
+    era: learning
+    verified: true
+
+  - id: kappen
+    name: Hilbert J. Kappen
+    years: ""
+    contribution: >-
+      Showed stochastic optimal control can be written as a path integral, so "what should
+      I do?" becomes "what is the average of all good futures?" — control as inference.
+    owns: path integral control
+    owns_concept: path-integral-control
+    era: modern
+    verified: true
+
+  - id: raginsky
+    name: Maxim Raginsky
+    years: ""
+    contribution: Ties learning, control, and information theory together with actual bounds.
+    owns: information-theoretic learning bounds
+    owns_concept: sysid
+    era: learning
+    verified: true

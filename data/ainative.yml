@@ -1,0 +1,64 @@
+# The repo audits itself.
+#
+# These are operating principles — HOW the repo works, not what it knows. Each names
+# in-repo evidence a script can check, so a regression in discipline fails the build just
+# like a regression in code. Scored by scripts/ainative.py, gated at 90.
+
+threshold: 90
+
+principles:
+  - id: spec-as-data
+    statement: Curated knowledge lives in data/*.yml; every published surface is generated and drift-gated.
+    evidence: [data/domains.yml, data/concepts.yml, data/claims.yml, scripts/readme.py]
+
+  - id: ready-is-a-gate
+    statement: The domain's definition of "done" is a machine gate with exit codes, never a vibe.
+    evidence: [src/control_anything/core/claim_gate.py, tools/check.py]
+
+  - id: no-evidence-means-no
+    statement: An unmeasured claim is excluded, never given a quiet pass.
+    evidence: [src/control_anything/core/claim_gate.py, tests/test_claim_gate.py]
+
+  - id: maker-is-not-checker
+    statement: The gate only judges; it never constructs claims or edits the spine.
+    evidence: [src/control_anything/core/claim_gate.py, src/control_anything/core/registry.py]
+
+  - id: mutation-checked
+    statement: Breaking the gate two different ways fails the suite — a gate that cannot fail proves nothing.
+    evidence: [tests/test_claim_gate.py]
+
+  - id: offline-deterministic
+    statement: make check runs with no keys and no network, giving byte-identical output.
+    evidence: [tests/conftest.py, Makefile]
+
+  - id: layering-law
+    statement: Core imports only stdlib, pyyaml, and core — enforced by AST walk, function-local imports included.
+    evidence: [tools/layers.py]
+
+  - id: graph-reachability
+    statement: No orphan nodes, and no claim reaches output bypassing the gate.
+    evidence: [src/control_anything/core/graph.py, tests/test_spine.py]
+
+  - id: honest-edges
+    statement: Limitations are stated where readers will see them, not buried.
+    evidence: [GOAL.md, README.md]
+
+  - id: rigour-vs-analogy
+    statement: Every control-to-AI bridge is typed rigorous or analogy, and an analogy cannot carry a guarantee.
+    evidence: [data/works.yml, data/claims.yml, src/control_anything/core/claim_gate.py]
+
+  - id: published-unverified-rate
+    statement: The fraction of unresolved citations is computed and printed, never hidden.
+    evidence: [src/control_anything/core/claim_gate.py, scripts/ca.py]
+
+  - id: compounding-memory
+    statement: Decisions and lessons land in data/ and CHANGELOG.md, not in chat.
+    evidence: [CHANGELOG.md, docs/REPO_PLAYBOOK.md]
+
+  - id: human-gated-irreversible
+    statement: Publishing and merging stay human; nothing here auto-posts or auto-merges.
+    evidence: [CONTRIBUTING.md]
+
+  - id: community-is-a-protocol
+    statement: A contribution must carry its assumption ledger and pass make check.
+    evidence: [CONTRIBUTING.md, .github/PULL_REQUEST_TEMPLATE.md]

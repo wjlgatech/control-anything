@@ -1,0 +1,132 @@
+# The twelve domains — a CLOSED SET.
+#
+# The stopping rule (GOAL.md §0): a domain earns a row here only if it can produce a
+# complete LoopCard in loops.yml — all six organs named with real handles. If you cannot
+# say what the sensor is, it is not a control problem and it does not belong here.
+# Growth happens by DEEPENING a domain, never by appending a thirteenth.
+#
+# `maturity` is how load-bearing closed-loop control already is in that domain:
+#   native      — the field was built on control theory; practitioners speak it fluently
+#   adopting    — control ideas are arriving and being used correctly
+#   metaphorical— the vocabulary is borrowed, the mathematics mostly is not (yet)
+
+domains:
+  - id: genai
+    name: Generative AI
+    plain: >-
+      Sampling steered toward a target distribution. The "guidance scale" everyone turns
+      is a loop gain, and turning it too far overshoots exactly the way a gain does.
+    maturity: adopting
+    loop_in_one_line: >-
+      noise is pushed toward data by following a learned score; guidance adds a steering term
+    concepts: [reverse-sde, guidance-gain, stochastic-optimal-control, optimal-transport, open-vs-closed]
+
+  - id: agentic
+    name: Agentic AI
+    plain: >-
+      Act, observe, act again. This is the first genuinely closed loop in software AI —
+      and almost none of it has been analysed as one.
+    maturity: metaphorical
+    loop_in_one_line: >-
+      a model emits an action, a tool returns an observation, and the observation re-enters the context
+    concepts: [feedback, open-vs-closed, error-accumulation, context-as-actuator, simplex-architecture, safety-filter, dead-time]
+
+  - id: physical-ai
+    name: Physical AI
+    plain: >-
+      Perception straight through to torque on real hardware, where latency is not
+      negotiable and the plant pushes back.
+    maturity: adopting
+    loop_in_one_line: >-
+      a learned policy reads sensors and writes joint commands at a fixed, unforgiving rate
+    concepts: [sysid, dead-time, saturation-antiwindup, iss, cbf, robust-vs-adaptive]
+
+  - id: robotics
+    name: Robotics
+    plain: >-
+      The classical plant: rigid bodies, contact, actuator limits. Where control theory
+      earned its reputation and where its assumptions are most visibly tested.
+    maturity: native
+    loop_in_one_line: >-
+      desired pose in, joint torques out, encoders and IMU closing the loop at kilohertz
+    concepts: [lqr, mpc, tube-mpc, backstepping, sliding-mode, cbf, observer, controllability, observability, passivity]
+
+  - id: world-models
+    name: World models
+    plain: >-
+      A learned model of how the world responds. Which is precisely the thing model
+      predictive control has always needed and rarely had.
+    maturity: adopting
+    loop_in_one_line: >-
+      predict the next state from the current one, plan against the prediction, act, correct
+    concepts: [sysid, mpc, separation-principle, reachability, error-accumulation]
+
+  - id: alignment
+    name: Alignment & AI safety
+    plain: >-
+      Human preference as the reference signal, oversight as a supervisory loop. The
+      hardest part is that the sensor and the plant are often the same system.
+    maturity: metaphorical
+    loop_in_one_line: >-
+      humans rate outputs, a reward model learns the rating, and a penalty keeps the model near a known-good point
+    concepts: [preference-setpoint, reward-model, kl-regulator, goodhart, trust-region, waterbed, internal-model-principle]
+
+  - id: driving
+    name: Autonomous driving
+    plain: >-
+      The most-deployed safety-critical learned loop on Earth, and the one with the most
+      public evidence about what goes wrong.
+    maturity: native
+    loop_in_one_line: >-
+      perceive, predict other agents, plan a trajectory, track it with a low-level controller
+    concepts: [mpc, reachability, cbf, observer, dead-time, margins]
+
+  - id: infra
+    name: AI infrastructure
+    plain: >-
+      Serving, batching, autoscaling. Textbook queueing and feedback control wearing a GPU
+      costume — and mostly written by people who have never called it that.
+    maturity: adopting
+    loop_in_one_line: >-
+      measure latency and queue depth, then adjust batch size, replica count, and clock speed
+    concepts: [feedback, continuous-batching, speculative-decoding, saturation-antiwindup, dead-time, margins]
+
+  - id: medicine
+    name: Medicine & biology
+    plain: >-
+      Closed-loop insulin, anaesthesia, neuromodulation. Where the plant is a person, the
+      model is always wrong, and the fallback matters more than the controller.
+    maturity: native
+    loop_in_one_line: >-
+      a sensor reads a physiological variable and a pump or stimulator acts, continuously, on a body
+    concepts: [feedback, observer, robust-vs-adaptive, saturation-antiwindup, iss, margins]
+
+  - id: energy
+    name: Power & energy
+    plain: >-
+      Grid frequency, inverters, datacenter cooling. The original hard real-time loop,
+      where instability is measured in blackouts.
+    maturity: native
+    loop_in_one_line: >-
+      generation is trimmed continuously so supply matches demand and frequency holds
+    concepts: [feedback, internal-model-principle, small-gain, passivity, margins, waterbed]
+
+  - id: aerospace
+    name: Aerospace
+    plain: >-
+      Where the discipline was forged, and the one place "certified" means a regulator
+      checked your assumption ledger.
+    maturity: native
+    loop_in_one_line: >-
+      pilot or autopilot commands an attitude; surfaces move; sensors close the loop under envelope limits
+    concepts: [margins, h-infinity, mu-synthesis, kalman-filter, saturation-antiwindup, separation-principle, controllability]
+
+  - id: markets
+    name: Markets & mechanisms
+    plain: >-
+      Feedback among strategic agents, where the plant reads your controller and changes
+      its behaviour because of it.
+    maturity: adopting
+    loop_in_one_line: >-
+      prices respond to orders, participants respond to prices, and the loop can run away
+    concepts: [feedback, mean-field-games, goodhart, waterbed, dead-time]

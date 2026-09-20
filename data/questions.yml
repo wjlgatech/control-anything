@@ -1,0 +1,357 @@
+# Open questions and their progress.
+#
+# `status` is deliberately coarse: open · partial · largely-solved. A question moves only
+# when something CHECKABLE changes, not when a paper claims it. `progress` states where the
+# field actually stands, including negative results — a well-measured "no" is progress.
+
+questions:
+  # ---- agentic ---------------------------------------------------------------------
+  - id: q-agent-stability
+    question: Can we prove stability of an agent loop?
+    domain: agentic
+    concepts: [lyapunov-function, feedback, error-accumulation]
+    why_hard: >-
+      The plant is a trillion-parameter nonlinear map over discrete tokens. There is no
+      state equation to write a Lyapunov function against.
+    progress: >-
+      Formalisms now exist that model an agent which can swap controllers, call tools, and
+      edit its own objective as one augmented closed-loop system — and they show that rapid
+      architecture switching destabilizes even when every individual mode is stable, which
+      is a classical switched-system result arriving in a new field. No general result.
+    status: partial
+
+  - id: q-error-accumulation
+    question: How do we bound error accumulation over a long agent horizon?
+    domain: agentic
+    concepts: [error-accumulation, iss, small-gain]
+    why_hard: >-
+      Errors are not independent. The model reads its own earlier mistakes and conditions
+      on them, which is positive feedback rather than noise.
+    progress: >-
+      Long-horizon failure now decomposes empirically into per-step accuracy times
+      self-conditioning on prior errors, and separate work argues errors arrive in
+      avalanches rather than independently. Empirical models exist; bounds do not.
+    status: partial
+
+  - id: q-human-plant-model
+    question: What is the plant model of a human user?
+    domain: agentic
+    concepts: [sysid, preference-setpoint, persistence-excitation]
+    why_hard: >-
+      Humans are non-stationary, they adapt to the agent, and their preferences change
+      BECAUSE of it — which violates the fixed-plant assumption every guarantee needs.
+    progress: >-
+      Preference models remain static in practice. The nearest formal treatment is work on
+      performative effects in recommender systems, where the act of predicting changes what
+      is predicted.
+    status: open
+
+  - id: q-actuation-unit
+    question: What is the right unit of actuation in an agent system?
+    domain: agentic
+    concepts: [context-as-actuator, controllability]
+    why_hard: >-
+      You can actuate weights, prompts, context, tools, or the harness, and the field has
+      no principle for choosing among them.
+    progress: >-
+      Converging on "actuate at the boundary you can verify" — context assembly for frozen
+      models, the action boundary for governance layers, individual operators for serving.
+    status: partial
+
+  - id: q-guardrail-composition
+    question: Can guardrails be composed without interacting badly?
+    domain: agentic
+    concepts: [safety-filter, simplex-architecture, waterbed]
+    why_hard: >-
+      Multiple filters form a multi-input multi-output system, and each is tuned in isolation.
+    progress: >-
+      Individual filters report measured false-positive and false-negative rates. Nothing
+      characterizes the interaction between stacked guardrails.
+    status: open
+
+  # ---- alignment -------------------------------------------------------------------
+  - id: q-rlhf-setpoint
+    question: Does reinforcement learning from human feedback have a well-posed setpoint?
+    domain: alignment
+    concepts: [preference-setpoint, reward-model, goodhart]
+    why_hard: >-
+      Aggregating heterogeneous human preferences into one scalar reward is provably lossy,
+      and the target moves with the raters.
+    progress: >-
+      Formal work proves that reward pairs immune to hacking are nearly trivial. Direct
+      preference optimization makes the SOLUTION well-posed by giving it a closed form, but
+      not the OBJECTIVE.
+    status: open
+
+  - id: q-overoptimization-knee
+    question: How far can you push a proxy reward before true quality degrades?
+    domain: alignment
+    concepts: [goodhart, kl-regulator, reward-model]
+    why_hard: You cannot measure the true reward at scale — which is why the proxy exists.
+    progress: >-
+      This is the field's ONE genuinely quantitative control law: true reward peaks then
+      declines with a fitted shape in the square root of the KL divergence, and there is an
+      early-stopping criterion derived from it.
+    status: largely-solved
+
+  - id: q-alignment-waterbed
+    question: Does the waterbed effect apply to alignment — does suppressing one behaviour amplify another?
+    domain: alignment
+    concepts: [waterbed, margins]
+    why_hard: >-
+      It would require a sensitivity function over behaviours, and behaviour space has no
+      agreed metric, so there is nothing to integrate.
+    progress: >-
+      Strong empirical convergence on safety versus over-refusal, and on jailbreak
+      resistance versus defensive refusal, as opposite failures of one tradeoff. Narrow
+      fine-tuning producing broad misalignment is the sharpest evidence. Nobody has proved
+      a conservation law.
+    status: open
+
+  - id: q-llm-observability
+    question: Is the internal state of a large model observable?
+    domain: alignment
+    concepts: [observability, observer]
+    why_hard: >-
+      The hidden state is high-dimensional and the map from activations to behaviour is not
+      known to be linear or complete.
+    progress: >-
+      Representation engineering, steering vectors, and sparse-autoencoder features give
+      partial read and write access. Features are findable; coverage is unmeasured. We can
+      observe SOME modes, not the state.
+    status: partial
+
+  - id: q-eval-as-sensor
+    question: Can we detect drift in a deployed system before users do?
+    domain: alignment
+    concepts: [observability, goodhart, sysid]
+    why_hard: >-
+      Drift comes from model updates, tool changes, and world changes simultaneously, and
+      evaluations are snapshots rather than monitors.
+    progress: >-
+      Evaluation-as-measurement is standard practice. Continuous evaluation in production
+      with a control chart is not.
+    status: open
+
+  - id: q-self-critique
+    question: Is a single-model self-critique loop ever stable?
+    domain: alignment
+    concepts: [observability, feedback, open-vs-closed]
+    why_hard: The sensor and the plant are the same system, so bias in the model is invisible to its own error signal.
+    progress: >-
+      Settled in practice, unsettled in theory: self-critique improves with an EXTERNAL
+      signal (tests, a compiler, the environment) and plateaus or drifts without one. The
+      practical rule — never close a loop on your own instrument — is as old as instrumentation.
+    status: partial
+
+  # ---- physical AI and robotics ----------------------------------------------------
+  - id: q-sim2real
+    question: Can the simulation-to-reality gap be closed without per-robot hand-tuning?
+    domain: physical-ai
+    concepts: [sysid, robust-vs-adaptive, persistence-excitation]
+    why_hard: >-
+      Simulators approximate contact, friction, sensor noise and actuator dynamics, and
+      small model errors compound over a rollout.
+    progress: >-
+      Solved in practice for legged locomotion, via learned actuator models, dynamics
+      randomization, and learned residual corrections. Still open for contact-rich
+      manipulation and deformables. Best current recipes co-train on simulation AND real
+      data rather than simulating alone.
+    status: partial
+
+  - id: q-learned-policy-guarantee
+    question: Can a learned policy carry a formal safety guarantee?
+    domain: physical-ai
+    concepts: [cbf, safety-filter, lyapunov-function]
+    why_hard: >-
+      The policy is a black box, certificates need a model, and filtering the policy pushes
+      it off its training distribution.
+    progress: >-
+      Barrier-function safety filters are mature and run on real hardware, and some work now
+      trains the constraint INTO the policy so no runtime filter is needed. The sharp recent
+      finding is that a minimally-invasive filter can be minimally invasive in the WRONG
+      METRIC: braking a diffusion policy along its own path preserved substantially more task
+      success than nudging it sideways. Guarantees remain probabilistic.
+    status: partial
+
+  - id: q-neural-verification
+    question: Can a neural controller be formally verified in closed loop?
+    domain: driving
+    concepts: [reachability, safety-filter, simplex-architecture]
+    why_hard: >-
+      Verification cost explodes with network size, and closed-loop means verifying the
+      network together with the plant.
+    progress: >-
+      Open-loop robustness verification is industrial-grade at competition scale.
+      Closed-loop reachability works on small systems; image-input cases remain hard. The
+      practical answer in deployment is "verify the backup, monitor the primary" — which is
+      the Simplex architecture.
+    status: open
+
+  - id: q-robot-data
+    question: Where does robot training data come from, given there is no internet of actions?
+    domain: physical-ai
+    concepts: [sysid, persistence-excitation]
+    why_hard: >-
+      Teleoperation costs roughly one robot-hour per robot-hour, and diversity across
+      scenes, objects and embodiments is expensive to automate.
+    progress: >-
+      Three live answers: pooled cross-institution datasets, human egocentric video at
+      enormous scale, and world-model-synthesized demonstrations. Data QUALITY is now the
+      named bottleneck — low-efficiency data contaminates the pool.
+    status: partial
+
+  - id: q-cross-embodiment
+    question: Does one policy transfer to a robot body it has never seen?
+    domain: physical-ai
+    concepts: [sysid, robust-vs-adaptive]
+    why_hard: Different kinematics, action spaces, sensors and latencies; naive transfer collapses.
+    progress: >-
+      Real movement, with an important caveat: benchmarks have only recently begun
+      separating STRICT zero-shot from pretrain-exposed zero-shot, and much earlier reported
+      transfer was the latter.
+    status: partial
+
+  - id: q-onboard-compute
+    question: Can a large model run fast enough on the robot itself?
+    domain: physical-ai
+    concepts: [dead-time, mpc, context-as-actuator]
+    why_hard: >-
+      A manipulator needs a command every few tens of milliseconds; a billion-parameter
+      forward pass takes longer than that even on strong hardware.
+    progress: >-
+      Solved by ARCHITECTURE rather than raw speed: action chunking (emit many future
+      actions and execute them open-loop while the next chunk computes), asynchronous
+      execution, and explicit two-rate hierarchies. Note what that costs — chunking is
+      open-loop execution inside a closed-loop system.
+    status: largely-solved
+
+  - id: q-long-horizon-robot
+    question: Can robots execute long-horizon multi-step tasks reliably?
+    domain: physical-ai
+    concepts: [error-accumulation, dynamic-programming]
+    why_hard: Errors compound, one bad subgoal ruins fifty steps, and credit assignment across minutes is hard.
+    progress: >-
+      Hierarchy works and is the consensus architecture — plan once, keep subgoal memory,
+      replan on failure. Best reported systems are far below the reliability a paying
+      customer needs.
+    status: partial
+
+  - id: q-reward-specification
+    question: How do you specify what you want without the system gaming it?
+    domain: physical-ai
+    concepts: [goodhart, reward-model, preference-setpoint]
+    why_hard: Hand-written rewards miss intent, and model-based judges are cheap but mis-score.
+    progress: >-
+      Vision-language models as reward functions are the default move, and they measurably
+      reward-hack: reported hacking rates under outcome-only rewards are substantial, and
+      reinforcement learning CREATES new failure modes rather than only inheriting them.
+    status: open
+
+  - id: q-policy-comparison
+    question: Can two robot policies even be compared honestly?
+    domain: physical-ai
+    concepts: [observability, sysid]
+    why_hard: >-
+      Real rollouts are stochastic, slow, need human resets, and every lab uses its own
+      hardware, tasks and success criteria.
+    progress: >-
+      Now recognized as the field's reproducibility problem, with distributed real-world
+      evaluation and standardized multi-policy comparisons emerging. No single accepted
+      standard yet.
+    status: partial
+
+  # ---- world models ----------------------------------------------------------------
+  - id: q-world-model-substitute
+    question: Can a world model substitute for real-world interaction?
+    domain: world-models
+    concepts: [sysid, mpc, error-accumulation]
+    why_hard: >-
+      A generative model that LOOKS right can be physically wrong in exactly the regime the
+      policy learns to exploit.
+    progress: >-
+      Flipped from "no" to "sometimes yes": policies trained entirely on generated data have
+      deployed to real robots. World models are now also the EVALUATOR and the simulator of
+      record — which is the self-critique problem with extra steps, and deserves the same
+      suspicion.
+    status: partial
+
+  - id: q-differentiable-contact
+    question: Are contact models accurate and differentiable enough to optimize through?
+    domain: world-models
+    concepts: [sysid, maximum-principle]
+    why_hard: >-
+      Contact is non-smooth: gradients go rugged at impact and vanish on flat regions, so
+      gradient-based optimizers stall.
+    progress: >-
+      Recent work identifies the properties a contact model must satisfy for well-behaved
+      gradients and builds models meeting them. An active problem, not a solved library.
+    status: open
+
+  - id: q-mpc-obsolete
+    question: Is model predictive control obsolete, or does learning still need a model?
+    domain: world-models
+    concepts: [mpc, sysid, dynamic-programming]
+    why_hard: >-
+      Learning gives robustness cheaply; predictive control gives constraints, physical
+      grounding and interpretability. Each is weak where the other is strong.
+    progress: >-
+      Consensus is HYBRID, not winner-take-all — predictive control guiding reinforcement
+      learning, learning augmenting model-based whole-body control. And the learned-policy
+      world has rediscovered predictive control from the other side: planning against a
+      learned video model over a receding horizon is MPC with a different plant model.
+    status: open
+
+  - id: q-robotics-scaling-laws
+    question: Do robotics scaling laws exist the way language scaling laws do?
+    domain: world-models
+    concepts: [sysid]
+    why_hard: >-
+      The axes are entangled — objects times scenes times embodiments times tasks — and
+      every data point costs physical time.
+    progress: >-
+      Data scaling dominates the literature, but nobody has published a robotics scaling law
+      with the predictive precision language models enjoy. The strongest concrete claims are
+      narrow transfer laws over limited ranges.
+    status: open
+
+  # ---- genai and infra -------------------------------------------------------------
+  - id: q-guidance-operating-range
+    question: What is the correct operating range for guidance strength?
+    domain: genai
+    concepts: [guidance-gain, margins, reverse-sde]
+    why_hard: >-
+      The quality-versus-fidelity tradeoff is model-specific and there is no measurable
+      margin analogous to gain margin.
+    progress: >-
+      Recent work reframes classifier-free guidance as a predictor-corrector scheme rather
+      than sampling a tilted distribution — which is the exact numerical-control primitive,
+      and a real step toward analysing it as a controller rather than a knob.
+    status: partial
+
+  - id: q-test-time-closed-loop
+    question: Is test-time compute a closed loop or an open loop?
+    domain: genai
+    concepts: [process-reward, open-vs-closed, observability]
+    why_hard: >-
+      It depends entirely on whether the verifier is independent of the generator. With a
+      self-verifier it is open loop wearing a feedback costume.
+    progress: >-
+      Compute-optimal allocation is measured, process reward models give a genuinely
+      external per-step signal when trained on human step labels, and best-of-n has an exact
+      characterization of how far it drifts. The distinction is now recognized but not
+      standardized.
+    status: partial
+
+  - id: q-layer-interference
+    question: Do serving-layer control loops and agent-layer control loops interfere?
+    domain: infra
+    concepts: [dead-time, feedback, small-gain]
+    why_hard: >-
+      Latency controllers change agent timing, which changes agent behaviour, which changes
+      load — an unmodelled outer loop around an inner one.
+    progress: >-
+      Serving-side work is becoming explicitly control-theoretic, including state-space
+      routing and per-phase operating-point selection. No work closes the loop across both
+      layers.
+    status: open
