@@ -61,6 +61,11 @@ All notable changes to this project are documented here, in
   and the test command. Neither was complete, and each was missing what the other had. That
   is exactly the drift an unwritten contract produces.
 
+### Added — CI restored (2026-09-24)
+
+- **`.github/workflows/check.yml`** — `make check` on every push and PR, closing GOAL.md M7
+  ("gated in CI"). Held back since 2026-09-19 only because the gh token lacked `workflow` scope.
+
 ### Added — verification is earned, not typed (2026-09-24)
 
 - **`data/resolutions.yml` + `make resolve`** (`scripts/resolve.py`) — the one networked

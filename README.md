@@ -310,6 +310,7 @@ low-confidence actions discarded, automatic failover to heuristics, human exit a
 control-anything/
 ├── GOAL.md                    the 10x contract — §0 evaluates the request before anything else
 ├── Makefile                   `make check` = the offline, deterministic finish line
+├── .github/workflows/check.yml CI runs the same `make check` on every push and PR
 ├── data/*.yml                 THE SINGLE SOURCE OF TRUTH. Nothing downstream is hand-edited.
 ├── src/control_anything/
 │   ├── core/                  models · claim_gate · graph · registry · citations (stdlib + pyyaml ONLY)
