@@ -11,6 +11,7 @@ mechanically caps the guarantee at what those assumptions discharge.
 2. Run `make check`. Spine · layers · graph · gate · readme · ainative · pytest must all
    pass (exit 0) before any change lands. It is offline and deterministic — no keys, no
    network, no clock. `tests/conftest.py` strips provider keys so nothing can go live.
+   CI (`.github/workflows/check.yml`) runs exactly this target — nothing more, nothing less.
 3. The engine is `src/control_anything/core/` — `models` · `claim_gate` · `graph` ·
    `registry` · `citations`. Thin CLIs in `scripts/`, gates in `tools/`, tests in `tests/`.
 
