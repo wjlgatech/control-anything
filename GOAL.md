@@ -151,8 +151,8 @@ Each must produce a complete `LoopCard` or it is cut. Source of truth: `data/dom
 | M1 | Spine green at birth | `make check` exits 0 on an empty-but-valid spine |
 | M2 | `LoopCard` + `ControlClaimGate` | `pytest` proves an over-claim is capped and a mutation of the gate fails the suite |
 | M3 | Knowledge graph + reachability | `make graph` proves 0 orphans and 1.00 gate coverage |
-| M4 | Corpus loaded, verification honest | `make check` prints `unverified_rate`; README drift-gated against it |
-| M5 | Flagship skill + verbs | `scripts/ca.py loopify\|gate\|trace` run offline and deterministically |
+| M4 | Corpus loaded, verification honest | `make check` prints `unverified_rate`; README drift-gated against it; every `verified: true` backed by a recorded primary-source answer (`data/resolutions.yml`) — ✅ 0.22 on 2026-09-24, target ≤ 0.25 |
+| M5 | Flagship skill + verbs | `scripts/ca.py loopify\|gate\|trace\|brief` run offline and deterministically |
 | M6 | Community protocol | `CONTRIBUTING.md` + a PR template that fails without an assumption ledger |
 | M7 | Self-audit | `make ainative` ≥ 90, gated in CI |
 

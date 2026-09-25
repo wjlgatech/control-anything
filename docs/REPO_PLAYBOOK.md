@@ -139,7 +139,7 @@ Appended per §3's rule — promote what generalizes beyond the repo that earned
    in a secondary source the user supplied — including a reversed author order — which is
    exactly the value a verification pass is supposed to add.
 
-7. **Publish the unflattering number.** `unverified_rate` sits at 0.53 and is printed in
+7. **Publish the unflattering number.** `unverified_rate` sits at 0.22 (it was 0.53 until verification became mechanical) and is printed in
    the README with an explanation, rather than being narrowed to the subset that looks
    good. A repo whose whole thesis is "state what your claim actually rests on" cannot
    launder its own metric.

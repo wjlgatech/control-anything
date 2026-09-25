@@ -30,7 +30,9 @@ python3 scripts/ca.py stats    # the metrics
 python3 scripts/ca.py gate     # judge every claim
 python3 scripts/ca.py loopify <system>
 python3 scripts/ca.py trace <claim-id>
+python3 scripts/ca.py brief <domain>   # one domain on one page
+make resolve                   # the only networked target: re-check every source
 
 ## Honest edges
-The G0-G4 ladder is a design judgement, not a theorem. unverified_rate is 0.53 and is
-published rather than hidden. Nothing here runs a live plant.
+The G0-G4 ladder is a design judgement, not a theorem. unverified_rate is 0.22 and is
+published rather than hidden; verified: true must be backed by data/resolutions.yml. Nothing here runs a live plant.
