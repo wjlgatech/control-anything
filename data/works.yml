@@ -55,7 +55,7 @@ works:
     authors: [wiener]
     venue: MIT Press
     idea: Steering, nerves, and machines obey the same feedback laws.
-    url: https://mitpress.mit.edu/9780262730099/cybernetics/
+    source: "MIT Press, 2nd ed. 1961, ISBN 978-0-262-73009-9"
     concepts: [feedback]
     verified: true
 

@@ -16,6 +16,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+import yaml  # noqa: E402
+
+from control_anything.core.citations import (  # noqa: E402
+    index_resolutions,
+    verification_problems,
+    work_source,
+)
 from control_anything.core.models import Organ, SpineError  # noqa: E402
 from control_anything.core.registry import Registry  # noqa: E402
 
@@ -73,6 +80,15 @@ def main() -> int:
             problems.append(
                 f"work {work['id']!r} names no source/doi/arxiv/url — an uncheckable citation"
             )
+
+    # `verified: true` must be EARNED: every handle the source names has a recorded answer
+    # from its primary service (data/resolutions.yml, written by `make resolve`). A typed
+    # flag with nothing behind it is the same unearned guarantee the claim gate catches.
+    res_file = ROOT / "data" / "resolutions.yml"
+    rows = (yaml.safe_load(res_file.read_text()) or {}).get("resolutions", []) if res_file.is_file() else []
+    items = [(f"claim {c.id}", c.source, c.verified) for c in spine.claims]
+    items += [(f"work {w['id']}", work_source(w), bool(w.get("verified"))) for w in spine.works]
+    problems += verification_problems(items, index_resolutions(rows))
 
     if problems:
         print(f"✗ spine: {len(problems)} problem(s)", file=sys.stderr)

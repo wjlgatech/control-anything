@@ -12,7 +12,7 @@ mechanically caps the guarantee at what those assumptions discharge.
    pass (exit 0) before any change lands. It is offline and deterministic — no keys, no
    network, no clock. `tests/conftest.py` strips provider keys so nothing can go live.
 3. The engine is `src/control_anything/core/` — `models` · `claim_gate` · `graph` ·
-   `registry`. Thin CLIs in `scripts/`, gates in `tools/`, tests in `tests/`.
+   `registry` · `citations`. Thin CLIs in `scripts/`, gates in `tools/`, tests in `tests/`.
 
 ## The one rule
 `data/*.yml` is the single source of truth. README tables are **generated** from it and
@@ -41,8 +41,12 @@ you have one, it needs a full LoopCard first — six organs plus latency, author
 
 ## Honesty rules specific to this repo
 - `verified: false` is the correct answer when a primary source was not resolved. The
-  repo publishes `unverified_rate` (currently 0.53) rather than narrowing to a flattering
+  repo publishes `unverified_rate` (currently 0.22) rather than narrowing to a flattering
   subset. Never flip a row to `verified: true` without actually resolving it.
+- `verified: true` is **earned, not typed**: `tools/check.py` refuses it unless every handle
+  in the source has a row in `data/resolutions.yml`. Add the handle, run `make resolve`
+  (the ONLY networked target — never wire it into `check`), then read the source and decide
+  whether it actually supports the claim. A resolved title proves existence, not support.
 - Never assert a death date, affiliation, or author order from a secondary source. Two
   rows in `people.yml` carry contested death dates marked unverified for exactly this reason.
 - `bridge: rigorous` means a theorem exists and you can name it. Everything else is `analogy`.

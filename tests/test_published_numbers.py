@@ -20,7 +20,7 @@ from control_anything.core.registry import Registry
 PUBLISHED = {
     "claims": 32,          # "wrote out 32 safety claims"
     "caught": 30,          # "capped or refused 30 of the 32"
-    "unverified_rate": 0.53,  # "an unverified_rate of 0.53"
+    "unverified_rate": 0.22,  # "an unverified_rate of 0.22"
 }
 
 ARTICLE = "https://agentic-portfolio-lovat.vercel.app/articles/assumption-ledger.html"
@@ -62,3 +62,25 @@ def test_the_articles_worked_example_still_computes_as_printed():
     assert verdict.claimed.code == "G3"
     assert verdict.effective.code == "G1"
     assert verdict.limiting == "assumption:mpc-model-match"
+
+
+#: Every doc that states the current unverified_rate in prose. "It was 0.53" history is
+#: allowed; the CURRENT figure — the first number after `unverified_rate` on a line — must
+#: match what the gate computes. This is the test that would have caught the drift that
+#: left 0.53 in five files after the number moved.
+PROSE = ("README.md", "CLAUDE.md", "llms.txt", "docs/REPO_PLAYBOOK.md")
+
+
+def test_prose_unverified_rate_matches_the_gate(stats):
+    import re
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[1]
+    want = f"{round(stats.unverified_rate, 2):.2f}"
+    stale = []
+    for name in PROSE:
+        for n, line in enumerate((root / name).read_text().splitlines(), 1):
+            m = re.search(r"unverified_rate`?\s*(?:\((?:currently\s*)?|is\s+|sits at\s+|of\s+|\|\s*)?(0\.\d+)", line)
+            if m and m.group(1)[:4] != want and not m.group(1).startswith(want):
+                stale.append(f"{name}:{n}: says {m.group(1)}, gate computes {want}")
+    assert not stale, "\n".join(stale)

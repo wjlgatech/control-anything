@@ -1,4 +1,4 @@
-.PHONY: check test spine layers graph gate loops readme readme-check readme-contract readme-bump ainative stats clean help
+.PHONY: check test spine layers graph gate loops readme readme-check readme-contract readme-bump ainative stats resolve brief clean help
 PY := python3
 
 # The finish line: `make check` gates the repo. Offline, deterministic, no keys, no network.
@@ -35,6 +35,12 @@ readme-bump:  ## raise the README-contract floor after a real gain
 
 ainative:     ## self-audit: how the repo operates, scored against data/ainative.yml
 	@$(PY) scripts/ainative.py
+
+resolve:      ## the ONE networked target: ask arXiv/doi.org/the web about every handle; writes data/resolutions.yml
+	@$(PY) scripts/resolve.py
+
+brief:        ## one domain on one page, e.g. `make brief D=robotics`
+	@$(PY) scripts/ca.py brief $(D)
 
 stats:        ## print the GOAL.md metrics (capped, gate_coverage, unverified_rate, orphans, loopified)
 	@$(PY) scripts/ca.py stats

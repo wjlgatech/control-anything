@@ -47,15 +47,16 @@ So the claim is capped from *robust* to *empirical* — by arithmetic, not by ta
 | capped | 19 | downgraded to what the assumptions support |
 | refused | 11 | a violated assumption, or a metaphor claiming a theorem |
 | gate coverage | 1.0 | fraction of claims that reach the gate (must be 1.0) |
-| unverified rate | 0.5312 | citations not resolved to a primary source |
+| unverified rate | 0.2188 | citations not resolved to a primary source |
 | orphan nodes | 0 | graph nodes nothing can reach (must be 0) |
 | complete LoopCards | 12/12 | domains with all six organs named |
 <!-- END:metrics -->
 
-> **Read that `unverified rate` honestly.** Just over half the claim corpus is ambient
-> folklore — "RLHF makes models aligned", "autoscaling meets the SLO" — deliberately
-> recorded *as folklore*, with `verified: false`, because that is what it is. The number is
-> printed rather than hidden. See [Honest edges](#honest-edges).
+> **Read that `unverified rate` honestly.** Every `verified: true` is backed by a recorded
+> answer from its primary source (`data/resolutions.yml`) — the flag cannot be typed. What is
+> left is mostly ambient folklore — "RLHF makes models aligned", "autoscaling meets the SLO" —
+> deliberately recorded *as folklore*, with `verified: false`, because that is what it is.
+> The number is printed rather than hidden. See [Honest edges](#honest-edges).
 
 ---
 
@@ -311,26 +312,29 @@ control-anything/
 ├── Makefile                   `make check` = the offline, deterministic finish line
 ├── data/*.yml                 THE SINGLE SOURCE OF TRUTH. Nothing downstream is hand-edited.
 ├── src/control_anything/
-│   ├── core/                  models · claim_gate · graph · registry (stdlib + pyyaml ONLY)
+│   ├── core/                  models · claim_gate · graph · registry · citations (stdlib + pyyaml ONLY)
 │   └── addons/                optional capability, reached through seams
-├── scripts/ca.py              the CLI: loopify · gate · trace · graph · loops · stats
+├── scripts/ca.py              the CLI: loopify · gate · trace · brief · graph · loops · stats
+├── scripts/resolve.py         the ONE networked script: asks arXiv/doi.org/the web about every source
 ├── scripts/readme.py          regenerates this file's tables; `--check` gates drift
-├── tools/check.py             spine gate — every foreign key resolves
+├── tools/check.py             spine gate — every foreign key resolves, every `verified: true` is earned
 ├── tools/layers.py            the layering law, enforced by AST walk
-├── tests/                     54 tests, including mutation tests on the gate itself
+├── tests/                     pytest, including mutation tests on the gate itself
 └── docs/                      ARCHITECTURE · REPO_PLAYBOOK
 ```
 
 | Target | What it gates |
 |---|---|
 | `make check` | everything below, in order. Exit 0 = green. |
-| `make spine` | the data loads, every foreign key resolves, no duplicate ids |
+| `make spine` | the data loads, every foreign key resolves, no duplicate ids, and every `verified: true` has a recorded answer from its primary source in `data/resolutions.yml` |
 | `make layers` | core imports only stdlib + pyyaml + core |
 | `make graph` | 0 orphans · gate coverage 1.0 · every concept mapped |
 | `make gate` | the gate catches ≥ 12 over-claims — *a gate that never fires is decorative* |
 | `make readme-check` | these tables still match `data/` |
 | `make ainative` | the repo still has the organs it claims to have |
 | `make test` | pytest |
+| `make resolve` | *not in `check` — the one networked target.* Asks arXiv / doi.org / Open Library / the page itself about every source handle and records the real title in `data/resolutions.yml` |
+| `make brief D=robotics` | *not a gate — a reader.* One domain on one page: its loop, its claims judged, the weakest assumption under each, what is still open. Dated by the data, not the clock |
 
 ---
 
@@ -338,7 +342,7 @@ control-anything/
 
 ```bash
 make check                 # the whole finish line: offline, no keys, no network, ~2s
-python3 -m pytest -q       # 58 tests
+python3 -m pytest -q       # the suite
 python3 scripts/ca.py stats
 ```
 
@@ -349,7 +353,7 @@ Inverting `min` to `max` on the assumption ledger, or dropping the violated-assu
 refusal, both turn the suite red.
 
 The tests also assert **the numbers this repo publishes in prose**
-(`tests/test_published_numbers.py`): 32 claims, 30 caught, `unverified_rate` 0.53. Changing
+(`tests/test_published_numbers.py`): 32 claims, 30 caught, `unverified_rate` 0.22. Changing
 a number now requires changing the article that states it, in the same commit. That coupling
 is what makes silent drift impossible rather than merely unlikely.
 
@@ -379,7 +383,9 @@ is what makes silent drift impossible rather than merely unlikely.
 What this repo deliberately does **not** carry: no network calls anywhere under
 `make check`, no API keys (`tests/conftest.py` strips provider keys so nothing can go live
 even by accident), no clock, no randomness, and no vendored copies of the work it cites —
-every external source is a resolvable DOI, arXiv id, or URL.
+every external source is a resolvable DOI, arXiv id, URL, or ISBN — and every one marked
+verified has been resolved: `data/resolutions.yml` records the title each primary service
+actually returned.
 
 The corpus was assembled by five bounded research passes with strict VERIFIED / UNVERIFIED
 output contracts. Rows that could not be resolved against a primary source are marked
@@ -398,10 +404,14 @@ Stated here, before anyone finds them.
   proved. The four ceiling values live in one place
   ([`AssumptionStatus.ceiling`](src/control_anything/core/models.py)) so they can be argued
   with.
-- **`unverified_rate` is 0.53 and that is the real number.** Roughly half the claim corpus
-  is ambient folklore recorded *as* folklore. Citations in `data/works.yml` fare much
-  better — most carry a DOI or arXiv id resolved against a primary source — but the repo
-  prints the corpus-wide figure rather than the flattering subset.
+- **`unverified_rate` is 0.22 and that is the real number — 7 of 32 claims.** It was 0.53
+  until "verified" stopped being a flag someone typed: a claim or work now counts as verified
+  only when every handle in its source (arXiv id, DOI, URL, ISBN) has a recorded answer from
+  its primary service in `data/resolutions.yml`, written by `make resolve`. Six of the seven
+  left are ambient folklore recorded *as* folklore — no primary source exists by design; the
+  seventh (`envelope-protection`) rests on DO-178C, a paywalled standard no script can open.
+  A resolution proves the source **exists and is what it says**; whether it *supports* the
+  claim is still a human reading, recorded in `data/claims.yml`.
 - **Verification is bounded by what a research pass could confirm.** Two people's death
   dates were reported by a secondary source and are marked `verified: false` rather than
   asserted, because these are real people. Several 2026-dated works are recent enough that

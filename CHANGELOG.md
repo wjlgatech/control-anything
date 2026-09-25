@@ -61,6 +61,29 @@ All notable changes to this project are documented here, in
   and the test command. Neither was complete, and each was missing what the other had. That
   is exactly the drift an unwritten contract produces.
 
+### Added — verification is earned, not typed (2026-09-24)
+
+- **`data/resolutions.yml` + `make resolve`** (`scripts/resolve.py`) — the one networked
+  target. Asks each source's primary service (arXiv via its DataCite DOI, doi.org, Open
+  Library, the page itself) and records the title it returned. 117 handles on record.
+  Why: `verified: true` was a flag a human typed — the exact unearned guarantee the gate
+  exists to catch in everyone else's claims.
+- **`core/citations.py` + a new clause in `tools/check.py`** — offline: every verified claim
+  *and* work must name a handle (arXiv / DOI / URL / ISBN) and every handle must be on record.
+  First run caught `context-engineering-controls-agents` verified with prose for a source,
+  and Wiener's *Cybernetics* verified against a URL that 403s to machines (now its ISBN).
+- **Ten claims resolved to primary sources** after reading each abstract against the claim
+  (NEJM closed-loop insulin trial, NTSB ASR-19-01, GR00T N1, Hi Robot, VLM-RM, DreamGen,
+  Reluplex + VNN-COMP, Kundur, the LULD evaluation, MIRAGE + LAP). `unverified_rate`
+  0.53 → **0.22**, under the GOAL.md target of 0.25. The seven left are six folklore claims
+  with no primary by design, plus DO-178C (paywalled).
+- **`ca brief <domain>`** (`make brief D=…`) — the fourth verb GOAL.md §3 promised: one
+  domain on one page — loop, claims judged, the weakest assumption under each, open
+  questions — dated by the newest resolution, never the clock, so it stays deterministic.
+- **A prose-number gate** (`test_prose_unverified_rate_matches_the_gate`) — the old 0.53 sat
+  un-gated in five docs after the number moved. Now any stale current figure fails `pytest`.
+  The article at agentic-portfolio was updated in all five languages in a paired PR.
+
 ### Decisions worth not re-litigating
 
 - **The gate, not the corpus, is the product.** Build order was gate → spine → corpus. A
@@ -71,13 +94,21 @@ All notable changes to this project are documented here, in
   risk to the repo's credibility.
 - **Twelve domains, closed set.** Unbounded scope was the clearest weakness in the original
   request. The LoopCard requirement is the mechanical stopping rule.
-- **`unverified_rate` is published, not hidden** (currently 0.53). Roughly half the claim
+- **`unverified_rate` is published, not hidden** (0.53 at launch, 0.22 since resolution became mechanical). Roughly half the claim
   corpus is ambient folklore recorded as folklore. Printing the corpus-wide number rather
   than the flattering `works.yml` subset.
 - **Two contested death dates marked `verified: false`** rather than asserted. A secondary
   source reported them; no primary source confirmed. These are real people.
 
 ### Investigated / Rejected
+
+- **arXiv export API as the primary resolver** — rejected 2026-09-24: after the first call it
+  answered 429 for every subsequent id even with 3→24 s backoff (10/11 failed in one probe).
+  The DataCite DOI `10.48550/arXiv.<id>` via doi.org resolved all of them first try.
+- **Hitting the 0.25 target by pairing folklore claims with adjacent papers** — rejected: a
+  source must state the claim, not sit near it. Open X-Embodiment and π0 were resolved and
+  NOT used for `vla-zero-shot-embodiment`, because neither claims zero-shot transfer to an
+  unseen body; MIRAGE and LAP do.
 
 - **networkx for the graph.** Rejected: it would put a third-party dependency in the core
   and break "runs on a bare machine". A sibling repo hit exactly this and had to back it

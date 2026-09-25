@@ -11,6 +11,7 @@ Verbs:
   graph    knowledge-graph invariants
   loops    LoopCard completeness
   stats    the GOAL.md metrics
+  brief    one domain on one page: its loop, its claims judged, what they rest on, what is open
 """
 
 from __future__ import annotations
@@ -22,6 +23,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
+
+import yaml  # noqa: E402
 
 from control_anything.core.claim_gate import ControlClaimGate  # noqa: E402
 from control_anything.core.graph import build_graph  # noqa: E402
@@ -294,6 +297,96 @@ def cmd_stats(args: argparse.Namespace) -> int:
 
 
 # --------------------------------------------------------------------------------------
+# brief
+# --------------------------------------------------------------------------------------
+
+
+def _as_of() -> str:
+    """The brief's window, read from the data — the newest date a primary source answered.
+
+    Deterministic on purpose: the date comes from data/resolutions.yml, never the clock, so
+    the same checkout prints the same brief on any machine on any day.
+    """
+    path = ROOT / "data" / "resolutions.yml"
+    rows = (yaml.safe_load(path.read_text()) or {}).get("resolutions", []) if path.is_file() else []
+    dates = sorted(str(r.get("checked")) for r in rows if r.get("checked"))
+    return dates[-1] if dates else "undated"
+
+
+def brief_of(spine, domain_id: str) -> dict:
+    """Everything a newcomer needs about one domain, as data (the CLI only prints it)."""
+    domain = next(d for d in spine.domains if d["id"] == domain_id)
+    gate = ControlClaimGate()
+    claims = [c for c in spine.claims if c.domain == domain_id]
+    verdicts = gate.judge_all(claims)
+    by_id = {c.id: c for c in claims}
+
+    load_bearing = []
+    for v in verdicts:
+        if not (v.limiting or "").startswith("assumption:"):
+            continue
+        aid = v.limiting.split(":", 1)[1]
+        a = next((a for a in by_id[v.claim_id].assumptions if a.id == aid), None)
+        if a is not None:
+            load_bearing.append({"claim": v.claim_id, "assumption": aid,
+                                 "status": a.status.value, "statement": a.statement})
+
+    return {
+        "domain": domain_id,
+        "name": domain["name"],
+        "as_of": _as_of(),
+        "plain": " ".join(str(domain.get("plain", "")).split()),
+        "maturity": domain.get("maturity"),
+        "loops": [{"id": l.id, "system": l.system,
+                   "organs": {o.value: l.organ(o) for o in Organ},
+                   "latency": l.latency, "authority": l.authority, "fallback": l.fallback}
+                  for l in spine.loops if l.domain == domain_id],
+        "claims": [{"id": v.claim_id, "headline": v.headline, "outcome": v.outcome,
+                    "verified": by_id[v.claim_id].verified} for v in verdicts],
+        "load_bearing": load_bearing,
+        "questions": [{"id": q["id"], "question": q["question"], "status": q.get("status")}
+                      for q in spine.questions if q.get("domain") == domain_id],
+    }
+
+
+def cmd_brief(args: argparse.Namespace) -> int:
+    """One domain on one page, dated by the data it was built from."""
+    spine = _load()
+    ids = sorted(d["id"] for d in spine.domains)
+    if args.domain not in ids:
+        print(f"✗ no domain {args.domain!r} — the closed set is: {', '.join(ids)}", file=sys.stderr)
+        return 1
+    b = brief_of(spine, args.domain)
+
+    if args.json:
+        print(json.dumps(b, indent=2))
+        return 0
+
+    print(f"\n── {b['name']}  ({b['maturity']})   as of {b['as_of']}\n")
+    print(f"  {b['plain']}\n")
+    for loop in b["loops"]:
+        print(f"  the loop — {loop['system']}  [{loop['id']}]")
+        for organ, value in loop["organs"].items():
+            print(f"    {organ:<12} {value}")
+        for field in ("latency", "authority", "fallback"):
+            print(f"    {field:<12} {loop[field]}")
+        print()
+    print("  claims, judged")
+    for c in b["claims"]:
+        print(f"    {c['headline']}{'' if c['verified'] else '   (source unresolved)'}")
+    if b["load_bearing"]:
+        print("\n  what they actually rest on — the weakest assumption under each capped claim")
+        for a in b["load_bearing"]:
+            print(f"    [{a['status']}] {a['claim']}: {a['statement']}")
+    if b["questions"]:
+        print("\n  still open")
+        for q in b["questions"]:
+            print(f"    ({q['status']}) {q['question']}")
+    print()
+    return 0
+
+
+# --------------------------------------------------------------------------------------
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -333,6 +426,11 @@ def main(argv: list[str] | None = None) -> int:
     p = sub.add_parser("stats", help="the GOAL.md metrics")
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_stats)
+
+    p = sub.add_parser("brief", help="one domain on one page, dated by its data")
+    p.add_argument("domain", help="a domain id from the closed set, e.g. robotics")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(func=cmd_brief)
 
     args = parser.parse_args(argv)
     return args.func(args)

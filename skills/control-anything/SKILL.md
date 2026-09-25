@@ -113,6 +113,7 @@ in the constraint layer, not in the policy. Recommend this before recommending a
 python3 scripts/ca.py loopify <system>   # the six organs for a stored system
 python3 scripts/ca.py gate <claim-id>    # full verdict with reasons
 python3 scripts/ca.py trace <claim-id>   # what the claim rests on
+python3 scripts/ca.py brief <domain>     # one domain on one page, dated by its data
 python3 scripts/ca.py stats              # corpus-wide metrics
 ```
 
